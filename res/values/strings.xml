@@ -1,0 +1,8 @@
+<resources>
+
+    <string name="app_name">MobiBand</string>
+    <string name="hello_world">MobiPerf Bandwidth Probing using Packet Train</string>
+    <string name="menu_settings">Settings</string>
+    <string name="title_activity_mobi_band">MobiBand</string>
+
+</resources>
