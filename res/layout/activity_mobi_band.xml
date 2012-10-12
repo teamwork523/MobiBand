@@ -10,41 +10,168 @@
         android:id="@+id/linearLayout1"
         android:gravity="center"
         android:layout_width="match_parent"
-        android:layout_height="60dp" >
+        android:layout_height="45dp" >
         
         <TextView
             android:id="@+id/hostLabel"
-            android:layout_width="25dp"
+            android:layout_width="100dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:textColor="#7B0099"
+            android:textColor="#000066"
             android:text="@string/hostLabel" />
         
         <EditText
             android:id="@+id/hostText"
-            android:layout_width="160dp"
-            android:layout_height="60dp"
+            android:layout_width="200dp"
+            android:layout_height="45dp"
             android:gravity="center"
+            android:inputType="textUri"
             android:text="@string/hostText" />
-
+        
+	</LinearLayout>
+	
+	<LinearLayout
+	    android:id="@+id/linearLayout2"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="45dp" >
+        
         <TextView
             android:id="@+id/portLabel"
-            android:layout_width="50dp"
+            android:layout_width="45dp"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:textSize="15sp"
             android:textStyle="bold"
-            android:textColor="#7B0099"
+            android:textColor="#000066"
             android:text="@string/portLabel" />
         
         <EditText
             android:id="@+id/portText"
             android:layout_width="80dp"
-            android:layout_height="60dp"
+            android:layout_height="45dp"
             android:gravity="center"
+            android:inputType="numberDecimal"
             android:text="@string/portText" />
         
     </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearLayout3"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="45dp" >
+        
+         <TextView
+            android:id="@+id/pktSizeLabel"
+            android:layout_width="50dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#000066"
+            android:text="@string/pktSizeLabel" />
+        
+        <EditText
+            android:id="@+id/pktSizeText"
+            android:layout_width="80dp"
+            android:layout_height="45dp"
+            android:gravity="center"
+            android:inputType="numberDecimal"
+            android:text="@string/pktSizeText" />
+        
+        <TextView
+            android:id="@+id/pktSizeUnit"
+            android:layout_width="20dp"
+            android:layout_height="wrap_content"
+            android:gravity="left"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#FFCC33"
+            android:text="@string/pktSizeUnit" />
+        
+        <TextView
+            android:id="@+id/gapLabel"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#000066"
+            android:text="@string/gapLabel" />
+        
+        <EditText
+            android:id="@+id/gapText"
+            android:layout_width="80dp"
+            android:layout_height="45dp"
+            android:gravity="center"
+            android:inputType="numberDecimal"
+            android:text="@string/gapText" />
+        
+        <TextView
+            android:id="@+id/gapUnit"
+            android:layout_width="25dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#FFCC33"
+            android:text="@string/gapUnit" />
+        
+	</LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearLayout4"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="45dp" >
+        
+        <TextView
+            android:id="@+id/totalNumPktLabel"
+            android:layout_width="150dp"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="#000066"
+            android:text="@string/totalNumPktLabel" />
+        
+        <EditText
+            android:id="@+id/totalNumPktText"
+            android:layout_width="100dp"
+            android:layout_height="45dp"
+            android:gravity="center"
+            android:inputType="number"
+            android:text="@string/totalNumPktText" />
+        
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearLayout5"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="45dp"  >
+        
+        <Button
+            android:id="@+id/startButton"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000066"
+            android:text="@string/startButtonText" />
+        
+    </LinearLayout>
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="220dp" >
+
+        <TextView
+            android:id="@+id/bandwidthReasult"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/bandwidthReasult" />
+
+    </ScrollView>
 </LinearLayout>

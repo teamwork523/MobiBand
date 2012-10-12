@@ -8,5 +8,15 @@
     <string name="hostText">owl.eecs.umich.edu</string>
     <string name="portLabel">Port #</string>
     <string name="portText">10100</string>
+    <string name="pktSizeLabel">Packet Size</string>
+    <string name="pktSizeText">1</string>
+    <string name="pktSizeUnit">kB</string>
+    <string name="totalNumPktLabel">Total number of Packet</string>
+    <string name="totalNumPktText">500</string>
+    <string name="gapLabel">    Gap</string>
+    <string name="gapText">0.2</string>
+    <string name="gapUnit">ms</string>
+    <string name="startButtonText">Start</string>
+    <string name="bandwidthReasult">To be displayed</string>
 
 </resources>
