@@ -12,7 +12,7 @@
     <string name="pktSizeText">1</string>
     <string name="pktSizeUnit">kB</string>
     <string name="totalNumPktLabel">Total number of Packet</string>
-    <string name="totalNumPktText">500</string>
+    <string name="totalNumPktText">50</string>
     <string name="gapLabel">    Gap</string>
     <string name="gapText">0.2</string>
     <string name="gapUnit">ms</string>

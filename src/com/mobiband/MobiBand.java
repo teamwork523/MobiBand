@@ -2,7 +2,10 @@ package com.mobiband;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import android.widget.Button;
@@ -18,6 +21,14 @@ public class MobiBand extends Activity {
 	private EditText totalNumPktText;
 	private Button startButton;
 	private TextView bandwidthReasult;
+	
+	// Experiment related variables
+	private int counter = 0;
+	private String hostnameValue = "";
+	private int portNumberValue = 0;
+	private double pktSizeValue = 0.0;
+	private double gapValue = 0.0;
+	private int trainLengthValue = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -27,7 +38,8 @@ public class MobiBand extends Activity {
         // connect with interface
         this.findAllViewsById();
         
-        // TODO: setup listener
+        // setup listener
+        startButton.setOnClickListener(OnClickStartListener);
     }
     
     // bind all the activities
@@ -40,4 +52,59 @@ public class MobiBand extends Activity {
     	startButton = (Button) findViewById(R.id.startButton);
     	bandwidthReasult = (TextView) findViewById(R.id.bandwidthReasult);
     }
+    
+    // enable/disable all Views
+    private void viewControl(boolean enable) {
+    	startButton.setEnabled(enable);
+    }
+    
+    // define start button listener
+    private OnClickListener OnClickStartListener = new OnClickListener() {
+		
+		public void onClick(View v) {
+			// output definition
+			String previousText = bandwidthReasult.getText().toString().trim();
+			String currentTaskResult = "";
+			
+			// disable all related view
+			viewControl(false);
+			
+			// fetch the current user input value
+			hostnameValue = hostText.getText().toString().trim();
+			portNumberValue = Integer.parseInt(portText.getText().toString().trim());
+			pktSizeValue = Double.parseDouble(pktSizeText.getText().toString().trim());
+			gapValue = Double.parseDouble(gapText.getText().toString().trim());
+			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
+			
+			// setup a task
+			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, hostnameValue, portNumberValue);
+			
+			// start a task
+			// Open/close socket has message only when exception happens
+			// runSocket always has a message
+			// TODO: refactor this part
+			if (!bandwidthTask.openSocket()) {
+				currentTaskResult = bandwidthTask.fetchExperiementResult();
+			} 
+			else {
+				bandwidthTask.runSocket();
+				currentTaskResult = bandwidthTask.fetchExperiementResult();
+				// must close the socket
+				if (!bandwidthTask.closeSocket()) {
+					currentTaskResult += "\n" + bandwidthTask.fetchExperiementResult();
+				}
+			}
+			
+			// display the result
+			if (previousText.equals(getString(R.string.bandwidthReasult))) {
+				previousText = "******************\nTask #" + (++counter) + "\n" + currentTaskResult + '\n';
+			}
+			else
+				previousText = "******************\nTask #" + (++counter) + "\n" + currentTaskResult + '\n' + previousText;
+			bandwidthReasult.setText(previousText);
+			
+			// re-enable the button
+			viewControl(true);
+		}
+	};
 }

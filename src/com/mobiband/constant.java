@@ -40,4 +40,7 @@ public class constant {
 	public static final String finalMSG = "END";
 	public static final String ackMSG = "ACK";
 	public static final String resultMSG = "RT";
+	public static final String errMSG = "ERROR";
+	public static final String successMSG = "SUCCESS";
+	public static final String logTagMSG = "MobilePktTrain";
 }
