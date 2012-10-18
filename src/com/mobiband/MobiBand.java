@@ -95,7 +95,7 @@ public class MobiBand extends Activity {
 			// currentTaskResult = "Please see results in /sdcard/tmp/";
 			
 			// display the result
-			previousText = "******************\nTask #" + (++counter) + " started, see detail in log\n" + previousText;
+			previousText = "******************\nTask #" + (++counter) + " started, see files in sdcard or log for detail\n" + previousText;
 			bandwidthReasult.setText(previousText);
 			
 			// re-enable the button

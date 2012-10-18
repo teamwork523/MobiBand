@@ -8,6 +8,10 @@
 package com.mobiband;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
@@ -46,7 +50,9 @@ public class tcpSender extends Thread {
 			this.closeSocket();
 		}
 		
-		//this.writeResultToScreen();
+		Log.i(constant.logTagMSG, "Start to write to file");
+		this.writeResultToFile();
+		Log.i(constant.logTagMSG, "Successful write to file");
 	}
 	
 	// class constructor
@@ -328,20 +334,61 @@ public class tcpSender extends Thread {
     }
 
     // write result to the scroll screen
-    private void writeResultToScreen() {
-    	// output definition
-    	String previousText = bandwidthDisResult.getText().toString().trim();
+    private void writeResultToFile() {
+    	String dstFilePath = constant.outPath + '/' + getCurrenTimeForFile() + ".txt";
+    	File d = new File(constant.outPath);
+    	File f = new File(dstFilePath);
     	
-    	// display the result
-		previousText = "******************\nTask @ " + getCurrentTime() + '\n' + this.fetchExperiementResult() + '\n' + previousText;
-		bandwidthDisResult.setText(previousText);
+    	// check if directory exist
+    	if (!d.exists()) {
+    		if (!d.mkdirs()) {
+    			Log.e(constant.logTagMSG, "ERROR: fail to create directory " + constant.outPath);
+    		}
+    	}
+    	
+    	// check file existence
+    	if (!f.exists()) {
+    		try {
+    			f.createNewFile();
+    			// set file to be readable
+    		} catch (IOException e) {
+    			e.printStackTrace();
+    			Log.e(constant.logTagMSG, "ERROR: fail to create file " + dstFilePath);
+    		}
+    	}
+    	
+    	// append to file 
+		try {
+			/*FileWriter fileWritter;
+			fileWritter = new FileWriter(dstFilePath,true);
+			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);*/
+
+	        String tempResult = "***************************\nTask @ " + getCurrentTimeWithFormat() + '\n' + probingResult + '\n';
+	        FileOutputStream out = new FileOutputStream(f, true);
+	        out.write(tempResult.getBytes(), 0, tempResult.length());
+	        out.close();
+	        
+	        //bufferWritter.write(tempResult);
+	        //bufferWritter.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+			Log.e(constant.logTagMSG, "ERROR: cannot write to file.\n" + e.toString());
+		}
     }
     
     // access current time
-    private String getCurrentTime() {
+    private String getCurrentTimeWithFormat() {
     	SimpleDateFormat sdfDate = new SimpleDateFormat("MMMMM.dd.yyyy hh:mm aaa");
         Date now = new Date();
         String strDate = sdfDate.format(now);
-        return strDate;
+        return strDate.trim();
+    }
+    
+    // access current data to create a folder
+    private String getCurrenTimeForFile() {
+    	SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy_MM_dd-HH");
+    	Date today = new Date();
+        String strDate = sdfDate.format(today);
+        return strDate.trim();
     }
 }

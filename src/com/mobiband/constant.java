@@ -7,6 +7,8 @@
 
 package com.mobiband;
 
+import android.os.Environment;
+
 public class constant {
 	// define the host name for the destination server
 	public static final String hostName = "owl.eecs.umich.edu";
@@ -43,4 +45,8 @@ public class constant {
 	public static final String errMSG = "ERROR";
 	public static final String successMSG = "SUCCESS";
 	public static final String logTagMSG = "MobilePktTrain";
+	
+	// output file path
+	public static final String outPath = Environment.getExternalStorageDirectory().getPath() + "/tmp";
+	//public static final String outPath = "/sdcard/tmp";
 }
