@@ -17,7 +17,6 @@ import java.net.UnknownHostException;
 import java.util.concurrent.locks.LockSupport;
 
 import android.util.Log;
-import android.widget.TextView;
 
 public class tcpSender extends Thread {
 	// Store the current experiment result
@@ -39,6 +38,9 @@ public class tcpSender extends Thread {
 	public void run() {
 		// run the experiment once
 		if (this.openSocket()) {
+			// synchronize the client and server parameters
+			this.sendConfigToSrv();
+			// packet train in progress
 			this.runSocket();
 			// must close the socket
 			this.closeSocket();
@@ -51,7 +53,7 @@ public class tcpSender extends Thread {
 	}
 	
 	// class constructor
-	tcpSender(double gap, double pkt, int train, String hostname, int portNumber, TextView textField) {
+	tcpSender(double gap, double pkt, int train, String hostname, int portNumber) {
 		if (gap != 0)
 			// convert from ms to ns
 			myGapSize = (long) (gap*java.lang.Math.pow(10.0, 6.0));
@@ -149,6 +151,21 @@ public class tcpSender extends Thread {
     	
     	Log.i(constant.logTagMSG, "Close Socket for package train.");
     	return true;
+    }
+    
+    // send client parameters to the server
+    // Format: "CONFIG: gap_size,pkt_size,train_len"
+    private void sendConfigToSrv() {
+    	String ackForConfigMessage;
+    	try {
+	        do {
+	        	// flush back the bandwidth result
+	        	out.println(constant.configMSG + ':' + myGapSize + ',' + myPktSize + ',' + myTrainLength);
+	        	out.flush();
+	        } while((ackForConfigMessage = in.readLine()) != null && !ackForConfigMessage.equals(constant.ackMSG));
+    	} catch (IOException e) {
+    		Log.d(constant.logTagMSG, e.toString());
+    	}
     }
     
     // send TCP packet train

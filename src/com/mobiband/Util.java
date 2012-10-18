@@ -19,7 +19,7 @@ import android.util.Log;
 public class Util {
     // access current time
     public static String getCurrentTimeWithFormat() {
-    	SimpleDateFormat sdfDate = new SimpleDateFormat("MMMMM.dd.yyyy hh:mm aaa");
+    	SimpleDateFormat sdfDate = new SimpleDateFormat("MMMMM.dd.yyyy hh:mm:ss aaa");
         Date now = new Date();
         String strDate = sdfDate.format(now);
         return strDate.trim();

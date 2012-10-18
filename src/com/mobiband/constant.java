@@ -44,9 +44,10 @@ public class constant {
 	public static final String resultMSG = "RT";
 	public static final String errMSG = "ERROR";
 	public static final String successMSG = "SUCCESS";
+	public static final String configMSG = "CONFIG";
 	public static final String logTagMSG = "MobilePktTrain";
 	
 	// output file path
-	public static final String outPath = Environment.getExternalStorageDirectory().getPath() + "/tmp";
+	public static final String outPath = Environment.getExternalStorageDirectory().getPath() + "/mobiband";
 	//public static final String outPath = "/sdcard/tmp";
 }

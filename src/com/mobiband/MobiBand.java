@@ -10,14 +10,11 @@ package com.mobiband;
 
 import android.os.Bundle;
 import android.app.Activity;
-import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 public class MobiBand extends Activity {
@@ -85,7 +82,7 @@ public class MobiBand extends Activity {
 			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
 			
 			// setup a task
-			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, hostnameValue, portNumberValue, bandwidthReasult);
+			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, hostnameValue, portNumberValue);
 			
 			// start a task
 			// Open/close socket has message only when exception happens
