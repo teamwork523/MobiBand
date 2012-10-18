@@ -8,17 +8,11 @@
 package com.mobiband;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 // for accuracy of nanoseconds
 import java.util.concurrent.locks.LockSupport;
 
@@ -28,7 +22,6 @@ import android.widget.TextView;
 public class tcpSender extends Thread {
 	// Store the current experiment result
 	private String probingResult = "";
-	private TextView bandwidthDisResult = null;
 	
 	// define all the variables
 	private Socket pkgTrainSocket = null;
@@ -44,15 +37,17 @@ public class tcpSender extends Thread {
 	
 	// thread execution part
 	public void run() {
+		// run the experiment once
 		if (this.openSocket()) {
 			this.runSocket();
 			// must close the socket
 			this.closeSocket();
 		}
 		
-		Log.i(constant.logTagMSG, "Start to write to file");
-		this.writeResultToFile();
-		Log.i(constant.logTagMSG, "Successful write to file");
+		// write to a file 
+		String dstFilePath = constant.outPath + '/' + Util.getCurrenTimeForFile() + ".txt";
+        String dstResult = "***************************\nTask @ " + Util.getCurrentTimeWithFormat() + '\n' + probingResult + '\n';
+		Util.writeResultToFile(dstFilePath, dstResult);
 	}
 	
 	// class constructor
@@ -80,8 +75,6 @@ public class tcpSender extends Thread {
 		else
 			myPortNumber = constant.tcpPortNumber;
 		
-		// bind the scroll view
-		bandwidthDisResult = textField;
 	}
 	
 	// fetch the experiment result
@@ -187,8 +180,8 @@ public class tcpSender extends Thread {
     	}
     	
     	// TODO: format the double precision
-    	probingResult += "Uplink Available Bandwidth is " + estUplinkBWResult + " Mbps\n" +
-    			         "Downlink Available Bandwidth is " + estDownlinkBWReult + " Mbps";
+    	probingResult += "Uplink Available Bandwidth is " + String.format("%.4f", estUplinkBWResult) + " Mbps\n" +
+    			         "Downlink Available Bandwidth is " + String.format("%.4f", estDownlinkBWReult) + " Mbps";
     	Log.i(constant.logTagMSG, probingResult);
     	return true;
     }
@@ -331,64 +324,5 @@ public class tcpSender extends Thread {
         Log.d(constant.logTagMSG, "Estimated Total download bandwidth is " + estTotalDownBandWidth + " Mbps.");
         Log.d(constant.logTagMSG, "Availabe fraction is " + availableBWFraction);
         Log.d(constant.logTagMSG, "Estimated Available download bandwidth is " + estDownlinkBWReult + " Mbps.");
-    }
-
-    // write result to the scroll screen
-    private void writeResultToFile() {
-    	String dstFilePath = constant.outPath + '/' + getCurrenTimeForFile() + ".txt";
-    	File d = new File(constant.outPath);
-    	File f = new File(dstFilePath);
-    	
-    	// check if directory exist
-    	if (!d.exists()) {
-    		if (!d.mkdirs()) {
-    			Log.e(constant.logTagMSG, "ERROR: fail to create directory " + constant.outPath);
-    		}
-    	}
-    	
-    	// check file existence
-    	if (!f.exists()) {
-    		try {
-    			f.createNewFile();
-    			// set file to be readable
-    		} catch (IOException e) {
-    			e.printStackTrace();
-    			Log.e(constant.logTagMSG, "ERROR: fail to create file " + dstFilePath);
-    		}
-    	}
-    	
-    	// append to file 
-		try {
-			/*FileWriter fileWritter;
-			fileWritter = new FileWriter(dstFilePath,true);
-			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);*/
-
-	        String tempResult = "***************************\nTask @ " + getCurrentTimeWithFormat() + '\n' + probingResult + '\n';
-	        FileOutputStream out = new FileOutputStream(f, true);
-	        out.write(tempResult.getBytes(), 0, tempResult.length());
-	        out.close();
-	        
-	        //bufferWritter.write(tempResult);
-	        //bufferWritter.close();
-		} catch (IOException e) {
-			e.printStackTrace();
-			Log.e(constant.logTagMSG, "ERROR: cannot write to file.\n" + e.toString());
-		}
-    }
-    
-    // access current time
-    private String getCurrentTimeWithFormat() {
-    	SimpleDateFormat sdfDate = new SimpleDateFormat("MMMMM.dd.yyyy hh:mm aaa");
-        Date now = new Date();
-        String strDate = sdfDate.format(now);
-        return strDate.trim();
-    }
-    
-    // access current data to create a folder
-    private String getCurrenTimeForFile() {
-    	SimpleDateFormat sdfDate = new SimpleDateFormat("yyyy_MM_dd-HH");
-    	Date today = new Date();
-        String strDate = sdfDate.format(today);
-        return strDate.trim();
-    }
+    }    
 }
