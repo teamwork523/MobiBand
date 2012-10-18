@@ -48,7 +48,10 @@ public class tcpSender extends Thread {
 		
 		// write to a file 
 		String dstFilePath = constant.outPath + '/' + Util.getCurrenTimeForFile() + ".txt";
-        String dstResult = "***************************\nTask @ " + Util.getCurrentTimeWithFormat() + '\n' + probingResult + '\n';
+        String dstResult = "***************************\nTask @ " + 
+		                   Util.getCurrentTimeWithFormat() + '\n' + 
+		                   this.paraInformation() + '\n' +
+		                   probingResult + '\n';
 		Util.writeResultToFile(dstFilePath, dstResult);
 	}
 	
@@ -331,8 +334,7 @@ public class tcpSender extends Thread {
         estTotalDownBandWidth = byteCounter/gapTimeClt/125.0;
         availableBWFraction = gapTimeSrv/gapTimeClt;
         estDownlinkBWReult = estTotalDownBandWidth * availableBWFraction;
-        
-        
+      
         // Display information at the server side
         Log.d(constant.logTagMSG, "Receive single Pkt size is " + singlePktSize + " Bytes.");
         Log.d(constant.logTagMSG, "Total receiving " + counter + " packets.");
@@ -342,4 +344,13 @@ public class tcpSender extends Thread {
         Log.d(constant.logTagMSG, "Availabe fraction is " + availableBWFraction);
         Log.d(constant.logTagMSG, "Estimated Available download bandwidth is " + estDownlinkBWReult + " Mbps.");
     }    
+    
+    // form the parameters information
+    private String paraInformation() {
+    	return "Hostname: " + myHostname + '\n' +
+    		   "Port: " + myPortNumber + '\n' +
+    		   "Packet Size: " + (double)(myPktSize)/java.lang.Math.pow(2, 10) + " kB\n" +
+    		   "Gap Size: " + (double)(myGapSize)/java.lang.Math.pow(10, 6) + " ms\n" +
+    		   "Train Length: " + myTrainLength;
+    }
 }
