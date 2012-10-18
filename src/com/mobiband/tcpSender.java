@@ -13,14 +13,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 // for accuracy of nanoseconds
 import java.util.concurrent.locks.LockSupport;
 
 import android.util.Log;
+import android.widget.TextView;
 
-public class tcpSender {
+public class tcpSender extends Thread {
 	// Store the current experiment result
 	private String probingResult = "";
+	private TextView bandwidthDisResult = null;
 	
 	// define all the variables
 	private Socket pkgTrainSocket = null;
@@ -34,8 +38,19 @@ public class tcpSender {
 	private double estUplinkBWResult = 0.0;
 	private double estDownlinkBWReult = 0.0;
 	
+	// thread execution part
+	public void run() {
+		if (this.openSocket()) {
+			this.runSocket();
+			// must close the socket
+			this.closeSocket();
+		}
+		
+		//this.writeResultToScreen();
+	}
+	
 	// class constructor
-	tcpSender(double gap, double pkt, int train, String hostname, int portNumber) {
+	tcpSender(double gap, double pkt, int train, String hostname, int portNumber, TextView textField) {
 		if (gap != 0)
 			// convert from ms to ns
 			myGapSize = (long) (gap*java.lang.Math.pow(10.0, 6.0));
@@ -58,16 +73,19 @@ public class tcpSender {
 			myPortNumber = portNumber;
 		else
 			myPortNumber = constant.tcpPortNumber;
+		
+		// bind the scroll view
+		bandwidthDisResult = textField;
 	}
 	
 	// fetch the experiment result
 	public String fetchExperiementResult() {
-		if (probingResult.equals("")) {
-			return "ERROR: Result is not ready";
-		}
-		else {
-			return probingResult;
-		}
+		return probingResult;
+	}
+	
+	// test if the result is ready
+	public boolean testExpResultReady() {
+		return (probingResult != "");
 	}
 	
 	// set up all the package parameters
@@ -81,25 +99,25 @@ public class tcpSender {
             // set the time out
             pkgTrainSocket.setSoTimeout(constant.tcpTimeOut);
 
-            Log.i(constant.logTagMSG, "Current receive buffer size is " + pkgTrainSocket.getReceiveBufferSize());
+            Log.d(constant.logTagMSG, "Current receive buffer size is " + pkgTrainSocket.getReceiveBufferSize());
             
             // set TCP no delay for packet transfer
             pkgTrainSocket.setTcpNoDelay(true);
-            Log.i(constant.logTagMSG, "Current nodelay is " + pkgTrainSocket.getTcpNoDelay());
+            Log.d(constant.logTagMSG, "Current nodelay is " + pkgTrainSocket.getTcpNoDelay());
             
             /*
             // set TCP sending buffer size
             pkgTrainSocket.setSendBufferSize(myPktSize/10);
-            Log.i(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getSendBufferSize());
+            Log.d(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getSendBufferSize());
             
             // set TCP receiving buffer size
             pkgTrainSocket.setReceiveBufferSize(myPktSize/10);
-            Log.i(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getReceiveBufferSize());*/
+            Log.d(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getReceiveBufferSize());*/
             
         } catch (UnknownHostException e) {
             // System.err.println("Don't know about host: " + myHostname);
             // System.exit(1);
-        	probingResult = constant.errMSG + ": Don't know about host: " + myHostname + " with port " + myPortNumber;
+        	probingResult += constant.errMSG + ": Don't know about host: " + myHostname + " with port " + myPortNumber;
         	// Log.d(constant.logTagMSG, e.getStackTrace().toString());
         	e.printStackTrace();
         	return false;
@@ -107,16 +125,16 @@ public class tcpSender {
         } catch (IOException e) {
             // System.err.println("Couldn't get I/O for " + "the connection to: " + myHostname );
             // System.exit(1);
-        	probingResult = constant.errMSG + ": Couldn't get I/O for " + "the connection to: " + myHostname + " with port " + myPortNumber;
+        	probingResult += constant.errMSG + ": Couldn't get I/O for " + "the connection to: " + myHostname + " with port " + myPortNumber;
         	//Log.d(constant.logTagMSG, e.getStackTrace().toString());
         	e.printStackTrace();
         	return false;
         }
     	
-    	Log.i(constant.logTagMSG, "Open Socket for package train.");
+    	Log.d(constant.logTagMSG, "Open Socket for package train.");
     	return true;
     }
-    
+        
     // close all the socket and IO streams
     public boolean closeSocket() {
     	try {
@@ -126,46 +144,46 @@ public class tcpSender {
     	} catch (IOException e) {
     		//Log.d(constant.logTagMSG, e.getStackTrace().toString());
     		e.printStackTrace();
-    		probingResult = constant.errMSG + ": Fail to close the socket.";
+    		probingResult += constant.errMSG + ": Fail to close the socket.";
     		return false;
     	}
     	
-    	Log.v(constant.logTagMSG, "Close Socket for package train.");
+    	Log.i(constant.logTagMSG, "Close Socket for package train.");
     	return true;
     }
     
     // send TCP packet train
     public boolean runSocket() {
     	try {
-    		 Log.i(constant.logTagMSG, "*****************************************************************");
-		     Log.i(constant.logTagMSG, "************************ Uplink BW Test *************************");
-		     Log.i(constant.logTagMSG, "*****************************************************************");
+    		 Log.d(constant.logTagMSG, "*****************************************************************");
+		     Log.d(constant.logTagMSG, "************************ Uplink BW Test *************************");
+		     Log.d(constant.logTagMSG, "*****************************************************************");
 		     
 	    	// upload link bandwidth test
 	    	runUpLinkTask();
 	    	
-	    	 Log.i(constant.logTagMSG, "*****************************************************************");
-		     Log.i(constant.logTagMSG, "********************** Downlink BW Test *************************");
-		     Log.i(constant.logTagMSG, "*****************************************************************");
+	    	 Log.d(constant.logTagMSG, "*****************************************************************");
+		     Log.d(constant.logTagMSG, "********************** Downlink BW Test *************************");
+		     Log.d(constant.logTagMSG, "*****************************************************************");
 	    	
 	    	// download link bandwidth test
 	    	runDownLinkTask();
     	} catch (NumberFormatException n) {
     		//Log.d(constant.logTagMSG, n.getStackTrace().toString());
     		n.printStackTrace();
-    		probingResult = constant.errMSG + ": Cannot convert string into proper format.";
+    		probingResult += constant.errMSG + ": Cannot convert string into proper format.";
     		return false;
     	} catch (IOException e) {
     		// Log.d(constant.logTagMSG, e.getStackTrace().toString());
     		e.printStackTrace();
-    		probingResult = constant.errMSG + ": IO Error.";
+    		probingResult += constant.errMSG + ": IO Error.";
     		return false;
     	}
     	
     	// TODO: format the double precision
-    	probingResult = "Uplink Available Bandwidth is " + estUplinkBWResult + " Mbps\n" +
-    			        "Downlink Available Bandwidth is " + estDownlinkBWReult + " Mbps";
-    	Log.v(constant.logTagMSG, probingResult);
+    	probingResult += "Uplink Available Bandwidth is " + estUplinkBWResult + " Mbps\n" +
+    			         "Downlink Available Bandwidth is " + estDownlinkBWReult + " Mbps";
+    	Log.i(constant.logTagMSG, probingResult);
     	return true;
     }
 
@@ -214,9 +232,9 @@ public class tcpSender {
 		afterTime = System.nanoTime();
 		//afterTime = System.currentTimeMillis();
 				
-		Log.i(constant.logTagMSG, "Single Packet size is " + payload.length() + " Bytes.");
-		Log.i(constant.logTagMSG, "Single GAP is " + myGapSize/java.lang.Math.pow(10.0, 6.0) + " ms.");
-		Log.i(constant.logTagMSG, "Total number of packet is " + counter);
+		Log.d(constant.logTagMSG, "Single Packet size is " + payload.length() + " Bytes.");
+		Log.d(constant.logTagMSG, "Single GAP is " + myGapSize/java.lang.Math.pow(10.0, 6.0) + " ms.");
+		Log.d(constant.logTagMSG, "Total number of packet is " + counter);
 		
 		String lastMSG;
 		// Total GAP calculation
@@ -230,7 +248,7 @@ public class tcpSender {
 		
 		double test = Double.parseDouble(lastMSG.substring(constant.finalMSG.length()+1));
 		
-		Log.i(constant.logTagMSG, "Client side takes " + test + " ms.");
+		Log.d(constant.logTagMSG, "Client side takes " + test + " ms.");
 		
 		// waiting for the upload link result
 		String uplinkBWResult;
@@ -238,7 +256,7 @@ public class tcpSender {
 			if (uplinkBWResult.substring(0, constant.resultMSG.length()).equals(constant.resultMSG)) {
 				estUplinkBWResult = Double.parseDouble(uplinkBWResult.substring(constant.resultMSG.length()+1));
 				// extra colon added
-				Log.i(constant.logTagMSG, "Uplink Bandwidth result is " + estUplinkBWResult + " Mbps");
+				Log.d(constant.logTagMSG, "Uplink Bandwidth result is " + estUplinkBWResult + " Mbps");
 				// send back the ACK result
 				out.println(constant.ackMSG);
 				out.flush();
@@ -278,7 +296,7 @@ public class tcpSender {
         	
         	// check for last message
         	if (inputLine.substring(0, constant.finalMSG.length()).equals(constant.finalMSG)) {
-        		Log.i(constant.logTagMSG, "Detect last download link message");
+        		Log.d(constant.logTagMSG, "Detect last download link message");
         		gapTimeSrv = Double.parseDouble(inputLine.substring(constant.finalMSG.length()+1));
         		break;
         	}
@@ -300,12 +318,30 @@ public class tcpSender {
         
         
         // Display information at the server side
-        Log.i(constant.logTagMSG, "Receive single Pkt size is " + singlePktSize + " Bytes.");
-        Log.i(constant.logTagMSG, "Total receiving " + counter + " packets.");
-        Log.i(constant.logTagMSG, "Server gap time is " + gapTimeSrv + " ms.");
-        Log.i(constant.logTagMSG, "Total package received " + byteCounter + " Bytes with " + gapTimeClt + " ms total GAP.");
-        Log.i(constant.logTagMSG, "Estimated Total download bandwidth is " + estTotalDownBandWidth + " Mbps.");
-        Log.i(constant.logTagMSG, "Availabe fraction is " + availableBWFraction);
-        Log.i(constant.logTagMSG, "Estimated Available download bandwidth is " + estDownlinkBWReult + " Mbps.");
+        Log.d(constant.logTagMSG, "Receive single Pkt size is " + singlePktSize + " Bytes.");
+        Log.d(constant.logTagMSG, "Total receiving " + counter + " packets.");
+        Log.d(constant.logTagMSG, "Server gap time is " + gapTimeSrv + " ms.");
+        Log.d(constant.logTagMSG, "Total package received " + byteCounter + " Bytes with " + gapTimeClt + " ms total GAP.");
+        Log.d(constant.logTagMSG, "Estimated Total download bandwidth is " + estTotalDownBandWidth + " Mbps.");
+        Log.d(constant.logTagMSG, "Availabe fraction is " + availableBWFraction);
+        Log.d(constant.logTagMSG, "Estimated Available download bandwidth is " + estDownlinkBWReult + " Mbps.");
+    }
+
+    // write result to the scroll screen
+    private void writeResultToScreen() {
+    	// output definition
+    	String previousText = bandwidthDisResult.getText().toString().trim();
+    	
+    	// display the result
+		previousText = "******************\nTask @ " + getCurrentTime() + '\n' + this.fetchExperiementResult() + '\n' + previousText;
+		bandwidthDisResult.setText(previousText);
+    }
+    
+    // access current time
+    private String getCurrentTime() {
+    	SimpleDateFormat sdfDate = new SimpleDateFormat("MMMMM.dd.yyyy hh:mm aaa");
+        Date now = new Date();
+        String strDate = sdfDate.format(now);
+        return strDate;
     }
 }

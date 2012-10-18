@@ -1,3 +1,11 @@
+/*
+ * @author Haokun Luo
+ * @Date   10/11/2012
+ * 
+ * Main Activity for MobiBand
+ * 
+ */
+
 package com.mobiband;
 
 import android.os.Bundle;
@@ -64,7 +72,7 @@ public class MobiBand extends Activity {
 		public void onClick(View v) {
 			// output definition
 			String previousText = bandwidthReasult.getText().toString().trim();
-			String currentTaskResult = "";
+			// String currentTaskResult = "";
 			
 			// disable all related view
 			viewControl(false);
@@ -77,30 +85,17 @@ public class MobiBand extends Activity {
 			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
 			
 			// setup a task
-			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, hostnameValue, portNumberValue);
+			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, hostnameValue, portNumberValue, bandwidthReasult);
 			
 			// start a task
 			// Open/close socket has message only when exception happens
 			// runSocket always has a message
 			// TODO: refactor this part
-			if (!bandwidthTask.openSocket()) {
-				currentTaskResult = bandwidthTask.fetchExperiementResult();
-			} 
-			else {
-				bandwidthTask.runSocket();
-				currentTaskResult = bandwidthTask.fetchExperiementResult();
-				// must close the socket
-				if (!bandwidthTask.closeSocket()) {
-					currentTaskResult += "\n" + bandwidthTask.fetchExperiementResult();
-				}
-			}
+			bandwidthTask.start();
+			// currentTaskResult = "Please see results in /sdcard/tmp/";
 			
 			// display the result
-			if (previousText.equals(getString(R.string.bandwidthReasult))) {
-				previousText = "******************\nTask #" + (++counter) + "\n" + currentTaskResult + '\n';
-			}
-			else
-				previousText = "******************\nTask #" + (++counter) + "\n" + currentTaskResult + '\n' + previousText;
+			previousText = "******************\nTask #" + (++counter) + " started, see detail in log\n" + previousText;
 			bandwidthReasult.setText(previousText);
 			
 			// re-enable the button
