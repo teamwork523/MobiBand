@@ -332,7 +332,7 @@ public class tcpSender extends Thread {
         // Bandwidth calculation
         // 1 Mbit/s = 125 Byte/ms 
         estTotalDownBandWidth = byteCounter/gapTimeClt/125.0;
-        availableBWFraction = gapTimeSrv/gapTimeClt;
+        availableBWFraction = Math.min(gapTimeSrv/gapTimeClt,1.0);
         estDownlinkBWReult = estTotalDownBandWidth * availableBWFraction;
       
         // Display information at the server side
