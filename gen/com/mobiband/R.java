@@ -15,7 +15,8 @@ public final class R {
         public static final int ic_launcher=0x7f020001;
     }
     public static final class id {
-        public static final int bandwidthReasult=0x7f070013;
+        public static final int autoButton=0x7f070012;
+        public static final int bandwidthReasult=0x7f070014;
         public static final int gapLabel=0x7f07000a;
         public static final int gapText=0x7f07000b;
         public static final int gapUnit=0x7f07000c;
@@ -26,13 +27,13 @@ public final class R {
         public static final int linearLayout3=0x7f070006;
         public static final int linearLayout4=0x7f07000d;
         public static final int linearLayout5=0x7f070010;
-        public static final int menu_settings=0x7f070014;
+        public static final int menu_settings=0x7f070015;
         public static final int pktSizeLabel=0x7f070007;
         public static final int pktSizeText=0x7f070008;
         public static final int pktSizeUnit=0x7f070009;
         public static final int portLabel=0x7f070004;
         public static final int portText=0x7f070005;
-        public static final int scrollView1=0x7f070012;
+        public static final int scrollView1=0x7f070013;
         public static final int startButton=0x7f070011;
         public static final int totalNumPktLabel=0x7f07000e;
         public static final int totalNumPktText=0x7f07000f;
@@ -45,6 +46,7 @@ public final class R {
     }
     public static final class string {
         public static final int app_name=0x7f040000;
+        public static final int autoButtonText=0x7f040012;
         public static final int bandwidthReasult=0x7f040011;
         public static final int gapLabel=0x7f04000d;
         public static final int gapText=0x7f04000e;

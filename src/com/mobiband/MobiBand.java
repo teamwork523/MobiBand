@@ -10,6 +10,8 @@ package com.mobiband;
 
 import android.os.Bundle;
 import android.app.Activity;
+//import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -25,6 +27,7 @@ public class MobiBand extends Activity {
 	private EditText gapText;
 	private EditText totalNumPktText;
 	private Button startButton;
+	private Button autoButton;
 	private TextView bandwidthReasult;
 	
 	// Experiment related variables
@@ -34,7 +37,12 @@ public class MobiBand extends Activity {
 	private double pktSizeValue = 0.0;
 	private double gapValue = 0.0;
 	private int trainLengthValue = 0;
-
+	
+	// auto probing arraies
+	private double[] pktSizeList = {0.5, 1, 2, 4, 8, 16, 32};
+	private double[] gapSizeList = {0.1, 0.3, 0.5, 0.7, 0.9};
+	private int[]    trainSizeList = {10, 25, 50, 100, 250};
+	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -45,6 +53,15 @@ public class MobiBand extends Activity {
         
         // setup listener
         startButton.setOnClickListener(OnClickStartListener);
+        // TODO: redesign this so that our app will not crash
+        autoButton.setOnClickListener(OnClickAutoListener);
+        
+        /*// start the service
+        Intent intent = new Intent(this, backgroundService.class);
+        // store the hostname and port number into the intent
+        intent.putExtra("hostname", hostText.getText().toString().trim());
+        intent.putExtra("portNumber", Integer.parseInt(portText.getText().toString().trim()));
+        startService(intent);*/
     }
     
     // bind all the activities
@@ -55,12 +72,14 @@ public class MobiBand extends Activity {
     	gapText = (EditText) findViewById(R.id.gapText);
     	totalNumPktText = (EditText) findViewById(R.id.totalNumPktText);
     	startButton = (Button) findViewById(R.id.startButton);
+    	autoButton = (Button) findViewById(R.id.autoButton);
     	bandwidthReasult = (TextView) findViewById(R.id.bandwidthReasult);
     }
     
     // enable/disable all Views
     private void viewControl(boolean enable) {
     	startButton.setEnabled(enable);
+    	autoButton.setEnabled(enable);
     }
     
     // define start button listener
@@ -77,7 +96,9 @@ public class MobiBand extends Activity {
 			// fetch the current user input value
 			hostnameValue = hostText.getText().toString().trim();
 			portNumberValue = Integer.parseInt(portText.getText().toString().trim());
+			// Unit: kB
 			pktSizeValue = Double.parseDouble(pktSizeText.getText().toString().trim());
+			// Unit: ms
 			gapValue = Double.parseDouble(gapText.getText().toString().trim());
 			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
 			
@@ -92,9 +113,46 @@ public class MobiBand extends Activity {
 			// currentTaskResult = "Please see results in /sdcard/tmp/";
 			
 			// display the result
-			previousText = "******************\nTask #" + (++counter) + " started, see files in sdcard or log for detail\n" + previousText;
+			previousText = "******************\nTask #" + (++counter) + " started. See files in sdcard or log for detail\n" + previousText;
 			bandwidthReasult.setText(previousText);
 			
+			// re-enable the button
+			viewControl(true);
+		}
+	};
+
+	// define auto button listener
+	private OnClickListener OnClickAutoListener = new OnClickListener() {
+
+		public void onClick(View v) {
+			// disable all related view
+			viewControl(false);
+			
+			Log.i("PktTrainService", "Total number of cases in background is " + pktSizeList.length * gapSizeList.length * trainSizeList.length);
+
+			// fetch the hostname and port number
+			String srvHostname = hostText.getText().toString().trim();
+			int srvPortNumber = Integer.parseInt(portText.getText().toString().trim());
+			int counter = 0;
+			
+			// loop through all the test cases
+			for (double pkt : pktSizeList) {
+				for (double gap : gapSizeList) {
+					for (int train : trainSizeList) {
+						String previousText = bandwidthReasult.getText().toString().trim();
+						// create a thread for test
+						tcpSender bandwidthTask = new tcpSender(gap, pkt, train, srvHostname, srvPortNumber);
+						// begin the bandwidth probing
+						bandwidthTask.start();
+						
+						// update screen information
+						previousText = "******************\nAuto Task #" + (++counter) + " created. See files in sdcard or log for detail\n" + previousText;
+						bandwidthReasult.setText(previousText);
+					}
+				}
+			}
+			
+			Log.i("PktTrainService", "Finish start all the tasks!");
 			// re-enable the button
 			viewControl(true);
 		}

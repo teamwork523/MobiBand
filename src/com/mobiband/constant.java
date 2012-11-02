@@ -29,7 +29,7 @@ public class constant {
 	public static final int pktTrainLength = 50;
 	
 	// the size of each packet on the train (in Byte)
-	public static final int pktSize = 50*1024;
+	public static final int pktSize = 500;
 	
 	// the gap of the size (in ms = 10^(-3)s)
 	public static final long pktGapMS = 1;

@@ -161,6 +161,16 @@
             android:textColor="#000066"
             android:text="@string/startButtonText" />
         
+        <Button
+            android:id="@+id/autoButton"
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:textColor="#000066"
+            android:text="@string/autoButtonText" />
+        
     </LinearLayout>
     <ScrollView
         android:id="@+id/scrollView1"

@@ -11,6 +11,9 @@ package com.mobiband;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.channels.FileChannel;
+import java.nio.channels.FileLock;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -34,6 +37,7 @@ public class Util {
     }
     
     // write result to the scroll screen
+    // create lock to prevent multiple file writes at the same time
     public static void writeResultToFile(String filename, String content) {
     	String dstFilePath = constant.outPath + '/' + getCurrenTimeForFile() + ".txt";
     	File d = new File(constant.outPath);
@@ -59,10 +63,22 @@ public class Util {
     	
     	// append to file 
 		try {
+			// prevent multiple threads write to the same file
+			FileChannel channel = new RandomAccessFile(f, "rw").getChannel(); // Use the file channel to create a lock on the file.
+			FileLock lock = null;
+			
+			do {
+				// try to acquire a lock
+				lock = channel.tryLock();
+			} while (lock == null);
+			
 	        FileOutputStream out = new FileOutputStream(f, true);
 	        out.write(content.getBytes(), 0, content.length());
 	        out.close();
 	        
+	        // release the lock
+	        lock.release();
+	        channel.close();
 	        //bufferWritter.write(tempResult);
 	        //bufferWritter.close();
 		} catch (IOException e) {

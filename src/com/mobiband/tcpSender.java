@@ -63,8 +63,7 @@ public class tcpSender extends Thread {
 		else
 			myGapSize = constant.pktGapNS;
 		if (pkt != 0)
-			// convert kB to Byte
-			myPktSize = (int)(pkt*java.lang.Math.pow(2.0, 10.0));
+			myPktSize = (int)pkt;
 		else
 			myPktSize = constant.pktSize;
 		if (train != 0)
@@ -349,7 +348,7 @@ public class tcpSender extends Thread {
     private String paraInformation() {
     	return "Hostname: " + myHostname + '\n' +
     		   "Port: " + myPortNumber + '\n' +
-    		   "Packet Size: " + (double)(myPktSize)/java.lang.Math.pow(2, 10) + " kB\n" +
+    		   "Packet Size: " + myPktSize + " Bytes\n" +
     		   "Gap Size: " + (double)(myGapSize)/java.lang.Math.pow(10, 6) + " ms\n" +
     		   "Train Length: " + myTrainLength;
     }
