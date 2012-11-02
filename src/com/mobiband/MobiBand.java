@@ -34,12 +34,12 @@ public class MobiBand extends Activity {
 	private int counter = 0;
 	private String hostnameValue = "";
 	private int portNumberValue = 0;
-	private double pktSizeValue = 0.0;
+	private int pktSizeValue = 0;
 	private double gapValue = 0.0;
 	private int trainLengthValue = 0;
 	
 	// auto probing arraies
-	private double[] pktSizeList = {0.5, 1, 2, 4, 8, 16, 32};
+	private int[] pktSizeList = {1, 2, 4, 8, 16, 32};
 	private double[] gapSizeList = {0.1, 0.3, 0.5, 0.7, 0.9};
 	private int[]    trainSizeList = {10, 25, 50, 100, 250};
 	
@@ -96,8 +96,8 @@ public class MobiBand extends Activity {
 			// fetch the current user input value
 			hostnameValue = hostText.getText().toString().trim();
 			portNumberValue = Integer.parseInt(portText.getText().toString().trim());
-			// Unit: kB
-			pktSizeValue = Double.parseDouble(pktSizeText.getText().toString().trim());
+			// Unit: Bytes
+			pktSizeValue = Integer.parseInt(pktSizeText.getText().toString().trim());
 			// Unit: ms
 			gapValue = Double.parseDouble(gapText.getText().toString().trim());
 			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
@@ -129,30 +129,29 @@ public class MobiBand extends Activity {
 			viewControl(false);
 			
 			Log.i("PktTrainService", "Total number of cases in background is " + pktSizeList.length * gapSizeList.length * trainSizeList.length);
-
+			
+			// output definition
+			String previousText = bandwidthReasult.getText().toString().trim();
+			
 			// fetch the hostname and port number
 			String srvHostname = hostText.getText().toString().trim();
 			int srvPortNumber = Integer.parseInt(portText.getText().toString().trim());
-			int counter = 0;
+			// Unit: Bytes
+			pktSizeValue = Integer.parseInt(pktSizeText.getText().toString().trim());
+			// Unit: ms
+			gapValue = Double.parseDouble(gapText.getText().toString().trim());
+			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
 			
 			// loop through all the test cases
-			for (double pkt : pktSizeList) {
-				for (double gap : gapSizeList) {
-					for (int train : trainSizeList) {
-						String previousText = bandwidthReasult.getText().toString().trim();
-						// create a thread for test
-						tcpSender bandwidthTask = new tcpSender(gap, pkt, train, srvHostname, srvPortNumber);
-						// begin the bandwidth probing
-						bandwidthTask.start();
-						
-						// update screen information
-						previousText = "******************\nAuto Task #" + (++counter) + " created. See files in sdcard or log for detail\n" + previousText;
-						bandwidthReasult.setText(previousText);
-					}
-				}
-			}
+			// create a thread for test
+			tcpSenderWrapper bandwidthTask = new tcpSenderWrapper(gapValue, pktSizeValue, trainLengthValue, srvHostname, srvPortNumber);
+			bandwidthTask.start();
 			
-			Log.i("PktTrainService", "Finish start all the tasks!");
+			// display the result
+			previousText = "******************\nTask (Auto) #" + (++counter) + " started. See files in sdcard or log for detail\n" + previousText;
+			bandwidthReasult.setText(previousText);
+						
+			Log.i("PktTrainService", "Auto test start!");
 			// re-enable the button
 			viewControl(true);
 		}

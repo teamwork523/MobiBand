@@ -17,6 +17,7 @@ import java.net.UnknownHostException;
 import java.util.concurrent.locks.LockSupport;
 
 import android.util.Log;
+//import android.telephony.SignalStrength;
 
 public class tcpSender extends Thread {
 	// Store the current experiment result
@@ -33,37 +34,85 @@ public class tcpSender extends Thread {
 	private int myPortNumber = 0;
 	private double estUplinkBWResult = 0.0;
 	private double estDownlinkBWReult = 0.0;
+	// private SignalStrength rssi = null;
 	
 	// thread execution part
 	public void run() {
+		// one experiment
+		sendPktTrain();
+		
+		// write to a sample file
+		writeSampleData();
+	}
+	
+	// process the packet train
+	public boolean sendPktTrain() {
 		// run the experiment once
 		if (this.openSocket()) {
 			// synchronize the client and server parameters
 			this.sendConfigToSrv();
 			// packet train in progress
-			this.runSocket();
+			if (!this.runSocket())
+				return false;
 			// must close the socket
-			this.closeSocket();
+			if (!this.closeSocket())
+				return false;
+			return true;			
 		}
-		
-		// write to a file 
-		String dstFilePath = constant.outPath + '/' + Util.getCurrenTimeForFile() + ".txt";
-        String dstResult = "***************************\nTask @ " + 
-		                   Util.getCurrentTimeWithFormat() + '\n' + 
-		                   this.paraInformation() + '\n' +
-		                   probingResult + '\n';
-		Util.writeResultToFile(dstFilePath, dstResult);
+		else {
+			return false;
+		}
+	}
+	
+	// write sample results to file
+	public void writeSampleData() {
+		String filename = Util.getCurrenTimeForFile() + ".txt";
+		String dstResult = "***************************\nTask @ " + 
+                Util.getCurrentTimeWithFormat("MMMMM.dd.yyyy hh:mm:ss aaa") + '\n' + 
+                this.paraInformation() + '\n' +
+                probingResult + '\n';
+		Util.writeResultToFile(filename, constant.outSamplePath, dstResult);
+	}
+	
+	/** write measurement data to file
+	 * In format of:
+	 * 1. TIME 
+	 * 2. UP_LINK 
+	 * 3. DOWN_LINK 
+	 * 4. GAP_SIZE 
+	 * 5. PKT_SIZE 
+	 * 6. TRAIN_LEN 
+	 * 7. (...)
+	 */
+	public void writeMeasureData (String filename, String folder, boolean isErr) {
+		String result = System.currentTimeMillis() + constant.DEL +
+						String.format("%.4f", estUplinkBWResult) + constant.DEL +
+						String.format("%.4f", estDownlinkBWReult) + constant.DEL +
+						myGapSize + constant.DEL +
+						myPktSize + constant.DEL +
+						myTrainLength + "\n";
+		if (isErr) {
+			result = probingResult+"\n";
+		}
+		Util.writeResultToFile(filename, folder, result);
+	}
+	
+	// update the variables
+	public void updateParameters (double gap, int pkt, int train) {
+		myGapSize = (long) (gap*java.lang.Math.pow(10.0, 6.0));
+		myPktSize = pkt;
+		myTrainLength = train;
 	}
 	
 	// class constructor
-	tcpSender(double gap, double pkt, int train, String hostname, int portNumber) {
+	public tcpSender(double gap, int pkt, int train, String hostname, int portNumber) {
 		if (gap != 0)
 			// convert from ms to ns
 			myGapSize = (long) (gap*java.lang.Math.pow(10.0, 6.0));
 		else
 			myGapSize = constant.pktGapNS;
 		if (pkt != 0)
-			myPktSize = (int)pkt;
+			myPktSize = pkt;
 		else
 			myPktSize = constant.pktSize;
 		if (train != 0)
@@ -78,7 +127,8 @@ public class tcpSender extends Thread {
 			myPortNumber = portNumber;
 		else
 			myPortNumber = constant.tcpPortNumber;
-		
+		// fetch current signal strength
+		// rssi = new 
 	}
 	
 	// fetch the experiment result

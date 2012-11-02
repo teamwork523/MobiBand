@@ -48,6 +48,10 @@ public class constant {
 	public static final String logTagMSG = "MobilePktTrain";
 	
 	// output file path
-	public static final String outPath = Environment.getExternalStorageDirectory().getPath() + "/mobiband";
+	public static final String outSamplePath = Environment.getExternalStorageDirectory().getPath() + "/mobiband/sample";
+	public static final String outDataPath = Environment.getExternalStorageDirectory().getPath() + "/mobiband/data";
 	//public static final String outPath = "/sdcard/tmp";
+	
+	// output measurement data delimiter
+	public static final String DEL = "\t";
 }
