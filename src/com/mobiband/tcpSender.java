@@ -77,8 +77,8 @@ public class tcpSender extends Thread {
 	/** write measurement data to file
 	 * In format of:
 	 * 1. TIME 
-	 * 2. UP_LINK 
-	 * 3. DOWN_LINK 
+	 * 2. UP_CAP 
+	 * 3. DOWN_CAP 
 	 * 4. GAP_SIZE 
 	 * 5. PKT_SIZE 
 	 * 6. TRAIN_LEN 
@@ -88,7 +88,7 @@ public class tcpSender extends Thread {
 		String result = System.currentTimeMillis() + constant.DEL +
 						String.format("%.4f", estUplinkBWResult) + constant.DEL +
 						String.format("%.4f", estDownlinkBWReult) + constant.DEL +
-						myGapSize + constant.DEL +
+						(double)(myGapSize)/Math.pow(10,6) + constant.DEL +
 						myPktSize + constant.DEL +
 						myTrainLength + "\n";
 		if (isErr) {
@@ -158,14 +158,14 @@ public class tcpSender extends Thread {
             pkgTrainSocket.setTcpNoDelay(true);
             Log.d(constant.logTagMSG, "Current nodelay is " + pkgTrainSocket.getTcpNoDelay());
             
-            /*
+
             // set TCP sending buffer size
-            pkgTrainSocket.setSendBufferSize(myPktSize/10);
-            Log.d(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getSendBufferSize());
+            pkgTrainSocket.setSendBufferSize(myPktSize);
+            //Log.d(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getSendBufferSize());
             
             // set TCP receiving buffer size
-            pkgTrainSocket.setReceiveBufferSize(myPktSize/10);
-            Log.d(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getReceiveBufferSize());*/
+            //pkgTrainSocket.setReceiveBufferSize(myPktSize);
+            //Log.d(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getReceiveBufferSize());
             
         } catch (UnknownHostException e) {
             // System.err.println("Don't know about host: " + myHostname);
@@ -248,9 +248,8 @@ public class tcpSender extends Thread {
     		return false;
     	}
     	
-    	// TODO: format the double precision
-    	probingResult += "Uplink Available Bandwidth is " + String.format("%.4f", estUplinkBWResult) + " Mbps\n" +
-    			         "Downlink Available Bandwidth is " + String.format("%.4f", estDownlinkBWReult) + " Mbps";
+    	probingResult += "Uplink Capacity is " + String.format("%.4f", estUplinkBWResult) + " Mbps\n" +
+    			         "Downlink Capacity is " + String.format("%.4f", estDownlinkBWReult) + " Mbps";
     	Log.i(constant.logTagMSG, probingResult);
     	return true;
     }
@@ -261,7 +260,8 @@ public class tcpSender extends Thread {
     	StringBuilder payload = new StringBuilder();
     		
     	// Create a zero string
-    	for (int i = 0; i < myPktSize; i++) {
+    	// include the newline at the end of packet
+    	for (int i = 0; i < myPktSize-1; i++) {
     		payload.append('0');
     	}
     		
@@ -382,7 +382,8 @@ public class tcpSender extends Thread {
         // 1 Mbit/s = 125 Byte/ms 
         estTotalDownBandWidth = byteCounter/gapTimeClt/125.0;
         availableBWFraction = Math.min(gapTimeSrv/gapTimeClt,1.0);
-        estDownlinkBWReult = estTotalDownBandWidth * availableBWFraction;
+        // estimate the IP layer capacity
+        estDownlinkBWReult = estTotalDownBandWidth / availableBWFraction;
       
         // Display information at the server side
         Log.d(constant.logTagMSG, "Receive single Pkt size is " + singlePktSize + " Bytes.");
