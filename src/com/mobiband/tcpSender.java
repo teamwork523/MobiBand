@@ -7,10 +7,12 @@
 
 package com.mobiband;
 
-import java.io.BufferedReader;
+// import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+// import java.io.InputStreamReader;
+// import java.io.PrintWriter;
 import java.net.Socket;
 import java.net.UnknownHostException;
 // for accuracy of nanoseconds
@@ -25,8 +27,8 @@ public class tcpSender extends Thread {
 	
 	// define all the variables
 	private Socket pkgTrainSocket = null;
-	private PrintWriter out = null;
-	private BufferedReader in = null;
+	private DataOutputStream out = null;
+	private DataInputStream in = null;
 	private long myGapSize = 0;
 	private int myPktSize = 0;
 	private int myTrainLength = 0;
@@ -145,9 +147,8 @@ public class tcpSender extends Thread {
     public boolean openSocket() {
     	try {
     		pkgTrainSocket = new Socket(myHostname, myPortNumber);
-            out = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
-            in = new BufferedReader(new InputStreamReader(
-            		pkgTrainSocket.getInputStream()));
+            out = new DataOutputStream(pkgTrainSocket.getOutputStream());
+            in = new DataInputStream(pkgTrainSocket.getInputStream());
             
             // set the time out
             pkgTrainSocket.setSoTimeout(constant.tcpTimeOut);
@@ -209,12 +210,18 @@ public class tcpSender extends Thread {
     // Format: "CONFIG: gap_size,pkt_size,train_len"
     private void sendConfigToSrv() {
     	String ackForConfigMessage;
+    	byte[] buffer = new byte[200];
+		int size;
     	try {
 	        do {
 	        	// flush back the bandwidth result
-	        	out.println(constant.configMSG + ':' + myGapSize + ',' + myPktSize + ',' + myTrainLength);
+	        	out.write((constant.configMSG + ':' + myGapSize + ',' + myPktSize + ',' + myTrainLength).getBytes());
 	        	out.flush();
-	        } while((ackForConfigMessage = in.readLine()) != null && !ackForConfigMessage.equals(constant.ackMSG));
+	        	
+	        	// receive from sender
+	        	size = in.read(buffer);
+	        	ackForConfigMessage = new String(buffer).trim();
+	        } while( size > 0 && !ackForConfigMessage.equals(constant.ackMSG));
     	} catch (IOException e) {
     		Log.d(constant.logTagMSG, e.toString());
     	}
@@ -257,18 +264,31 @@ public class tcpSender extends Thread {
     // upload link test
     private void runUpLinkTask() throws IOException {
 	    // create payload for the packet train
-    	StringBuilder payload = new StringBuilder();
+    	/*StringBuilder payload = new StringBuilder();
     		
     	// Create a zero string
     	// include the newline at the end of packet
-    	for (int i = 0; i < myPktSize-1; i++) {
+    	for (int i = 0; i < myPktSize; i++) {
     		payload.append('0');
     	}
     		
     	// assign special characters
     	payload.setCharAt(0, 's');
-    	payload.setCharAt(payload.length()-1, 'e');
-			
+    	payload.setCharAt(payload.length()-1, 'e');*/
+    	// StringBuilder payload = new StringBuilder();
+		byte[] payload = new byte[myPktSize];
+    		
+    	// Create a zero string
+    	for (int i = 0; i < myPktSize; i++) {
+    		payload[i] = '0';
+    	}
+    		
+    	// assign special characters
+    	payload[0] = 's';
+    	payload[myPktSize-1] = 'e';
+    	
+    	System.out.println("Current payload is " + new String(payload));
+    	
 	    // create a counter for packet train
     	int counter = 0;
     	long beforeTime = 0;
@@ -283,7 +303,7 @@ public class tcpSender extends Thread {
 			}
 			
 			// send packet with constant gap
-			out.println(payload);
+			out.write(payload);
 			out.flush();
 			
 			// create train gap in nanoseconds
@@ -300,7 +320,7 @@ public class tcpSender extends Thread {
 		afterTime = System.nanoTime();
 		//afterTime = System.currentTimeMillis();
 				
-		Log.d(constant.logTagMSG, "Single Packet size is " + payload.length() + " Bytes.");
+		Log.d(constant.logTagMSG, "Single Packet size is " + payload.length + " Bytes.");
 		Log.d(constant.logTagMSG, "Single GAP is " + myGapSize/java.lang.Math.pow(10.0, 6.0) + " ms.");
 		Log.d(constant.logTagMSG, "Total number of packet is " + counter);
 		
@@ -310,23 +330,31 @@ public class tcpSender extends Thread {
 		// diffTime = myTrainLength*myGapSize/java.lang.Math.pow(10.0, 6.0);
 		// diffTime = myTrainLength*constant.pktGapMS;
 		lastMSG = constant.finalMSG + ':' + diffTime;
+		// byte[] lastBuffer = new byte[lastMSG.length()];
+		
 		// send the last message
-		out.println(lastMSG);
+		out.write(lastMSG.getBytes());
 		out.flush();
 		
-		double test = Double.parseDouble(lastMSG.substring(constant.finalMSG.length()+1));
+		//Log.d(constant.logTagMSG, "The last message in bytes: " + new String(lastMSG.getBytes()));
+		
+		double test = Double.parseDouble(lastMSG.substring(constant.finalMSG.length()+1, constant.lastMSGLEN));
 		
 		Log.d(constant.logTagMSG, "Client side takes " + test + " ms.");
 		
 		// waiting for the upload link result
 		String uplinkBWResult;
-		while ((uplinkBWResult = in.readLine()) != null) {
+		byte[] buffer = new byte[200];
+		int size;
+		size = in.read(buffer);
+		while (size > 0) {
+			uplinkBWResult = new String(buffer).trim();
 			if (uplinkBWResult.substring(0, constant.resultMSG.length()).equals(constant.resultMSG)) {
-				estUplinkBWResult = Double.parseDouble(uplinkBWResult.substring(constant.resultMSG.length()+1));
+				estUplinkBWResult = Double.parseDouble(uplinkBWResult.substring(constant.resultMSG.length()+1, constant.lastMSGLEN));
 				// extra colon added
 				Log.d(constant.logTagMSG, "Uplink Bandwidth result is " + estUplinkBWResult + " Mbps");
 				// send back the ACK result
-				out.println(constant.ackMSG);
+				out.write((constant.ackMSG).getBytes());
 				out.flush();
 				break;
 			}
@@ -350,8 +378,19 @@ public class tcpSender extends Thread {
         double estTotalDownBandWidth = 0.0;
         double availableBWFraction = 1.0;
         
+        byte[] buffer = new byte[myPktSize];
+        int size;
+        size = in.read(buffer);
         // output from what received
-        while ((inputLine = in.readLine()) != null) {
+        while (size > 0) {
+        	System.out.println("Received "+ counter +" buffer: ");
+        	for (int i = 0; i < buffer.length; i++) {
+        		System.out.print((char)(buffer[i]));
+        	}
+        	System.out.print("\n");
+        	inputLine = new String(buffer).trim();
+        	System.out.println("Received the "+ counter +" message: " + inputLine);
+  
         	// check if the start time recorded for first received packet
         	if (startTime == 0) {
         		//startTime = System.currentTimeMillis();
@@ -371,6 +410,8 @@ public class tcpSender extends Thread {
         	
         	// increase the counter
         	counter++;
+
+        	size = in.read(buffer);
         }
         
         

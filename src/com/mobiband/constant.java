@@ -47,6 +47,9 @@ public class constant {
 	public static final String configMSG = "CONFIG";
 	public static final String logTagMSG = "MobilePktTrain";
 	
+	// limit the control message size;
+	public static final int lastMSGLEN = 15;
+	
 	// output file path
 	public static final String outSamplePath = Environment.getExternalStorageDirectory().getPath() + "/mobiband/sample";
 	public static final String outDataPath = Environment.getExternalStorageDirectory().getPath() + "/mobiband/data";
