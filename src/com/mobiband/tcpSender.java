@@ -7,7 +7,7 @@
 
 package com.mobiband;
 
-import java.io.DataInputStream;
+//import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -28,7 +28,7 @@ public class tcpSender extends Thread {
 	// define all the variables
 	private Socket pkgTrainSocket = null;
 	private DataOutputStream out = null;
-	private DataInputStream in = null;
+	//private DataInputStream in = null;
 	private PrintWriter outCtrl = null;
 	private BufferedReader inCtrl = null;
 	private long myGapSize = 0;
@@ -149,12 +149,12 @@ public class tcpSender extends Thread {
     public boolean openSocket() {
     	try {
     		pkgTrainSocket = new Socket(myHostname, myPortNumber);
-            out = new DataOutputStream(pkgTrainSocket.getOutputStream());
+            /*out = new DataOutputStream(pkgTrainSocket.getOutputStream());
             in = new DataInputStream(pkgTrainSocket.getInputStream());
             // control stream
 	        outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
             inCtrl = new BufferedReader(new InputStreamReader(
-            		pkgTrainSocket.getInputStream()));
+            		pkgTrainSocket.getInputStream()));*/
             // set the time out
             pkgTrainSocket.setSoTimeout(constant.tcpTimeOut);
 
@@ -197,10 +197,10 @@ public class tcpSender extends Thread {
     // close all the socket and IO streams
     public boolean closeSocket() {
     	try {
-	    	in.close();
+	    	/*in.close();
 	    	out.close();
 	    	inCtrl.close();
-	    	outCtrl.close();
+	    	outCtrl.close();*/
 	    	pkgTrainSocket.close();
     	} catch (IOException e) {
     		//Log.d(constant.logTagMSG, e.getStackTrace().toString());
@@ -220,6 +220,9 @@ public class tcpSender extends Thread {
     	/*byte[] buffer = new byte[200];
 		int size;*/
     	try {
+    		outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
+    		inCtrl = new BufferedReader(new InputStreamReader(
+            		pkgTrainSocket.getInputStream()));
 	        do {
 	        	// flush back the bandwidth result
 	        	outCtrl.println(constant.configMSG + ':' + myGapSize + ',' + myPktSize + ',' + myTrainLength);
@@ -229,8 +232,11 @@ public class tcpSender extends Thread {
 	        	// size = in.read(buffer);
 	        	// ackForConfigMessage = new String(buffer).trim();
 	        } while( (ackForConfigMessage = inCtrl.readLine()) != null && !ackForConfigMessage.equals(constant.ackMSG));
+	        inCtrl.close();
     	} catch (IOException e) {
     		Log.d(constant.logTagMSG, e.toString());
+    	} finally {
+    		outCtrl.close();
     	}
     }
     
@@ -308,6 +314,8 @@ public class tcpSender extends Thread {
     	long afterTime = 0;
     	double diffTime = 0;
     	
+    	out = new DataOutputStream(pkgTrainSocket.getOutputStream());
+    	
 		while (counter < myTrainLength) {
 			// start recording the first packet send time
 			if (beforeTime == 0) {
@@ -329,6 +337,8 @@ public class tcpSender extends Thread {
 			counter++;
 		}
 		
+		out.close();
+		
 		// record finish transmission time
 		afterTime = System.nanoTime();
 		//afterTime = System.currentTimeMillis();
@@ -345,9 +355,13 @@ public class tcpSender extends Thread {
 		lastMSG = constant.finalMSG + ':' + diffTime;
 		// byte[] lastBuffer = new byte[lastMSG.length()];
 		
+		outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
+		
 		// send the last message
 		outCtrl.println(lastMSG);
 		outCtrl.flush();
+		
+		outCtrl.close();
 		
 		//Log.d(constant.logTagMSG, "The last message in bytes: " + new String(lastMSG.getBytes()));
 		
@@ -360,6 +374,11 @@ public class tcpSender extends Thread {
 		/*byte[] buffer = new byte[200];
 		int size;
 		size = in.read(buffer);*/
+		
+		outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
+        inCtrl = new BufferedReader(new InputStreamReader(
+        		pkgTrainSocket.getInputStream()));
+		
 		Log.d(constant.logTagMSG, "Before waiting for the input");
 		while ((uplinkBWResult = inCtrl.readLine()) != null) {
 			Log.d(constant.logTagMSG, "Received bandwidth is " + uplinkBWResult);
@@ -374,6 +393,8 @@ public class tcpSender extends Thread {
 				break;
 			}
 		}
+		outCtrl.close();
+		inCtrl.close();
     }
     
     // download link test
@@ -396,6 +417,10 @@ public class tcpSender extends Thread {
         /*byte[] buffer = new byte[myPktSize];
         int size;
         size = in.read(buffer);*/
+        
+        inCtrl = new BufferedReader(new InputStreamReader(
+        		pkgTrainSocket.getInputStream()));
+        
         // output from what received
         while ((inputLine = inCtrl.readLine()) != null) {
         	/*System.out.println("Received "+ counter +" buffer: ");
@@ -429,6 +454,7 @@ public class tcpSender extends Thread {
         	//size = in.read(buffer);
         }
         
+        inCtrl.close();
         
         //endTime = System.currentTimeMillis();
         endTime = System.nanoTime();
