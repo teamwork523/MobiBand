@@ -5,19 +5,19 @@
     <string name="menu_settings">Settings</string>
     <string name="title_activity_mobi_band">MobiBand</string>
     <string name="hostLabel">Hostname/IP</string>
-    <string name="hostText">owl.eecs.umich.edu</string>
+    <string name="hostText">ep2.eecs.umich.edu</string>
     <string name="portLabel">Port #</string>
     <string name="portText">10100</string>
     <string name="pktSizeLabel">Packet Size</string>
-    <string name="pktSizeText">724</string>
+    <string name="pktSizeText">1024</string>
     <string name="pktSizeUnit">B</string>
     <string name="totalNumPktLabel">Total number of Packet</string>
-    <string name="totalNumPktText">50</string>
+    <string name="totalNumPktText">5</string>
     <string name="gapLabel">    Gap</string>
-    <string name="gapText">0.3</string>
+    <string name="gapText">500</string>
     <string name="gapUnit">ms</string>
-    <string name="startButtonText">Start</string>
+    <string name="startButtonText">Single Test</string>
     <string name="bandwidthReasult"></string>
-    <string name="autoButtonText">Auto</string>
+    <string name="autoButtonText">Complete Test</string>
 
 </resources>

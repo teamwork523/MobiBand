@@ -106,7 +106,7 @@
             android:layout_width="80dp"
             android:layout_height="45dp"
             android:gravity="center"
-            android:inputType="numberDecimal"
+            android:inputType="number"
             android:text="@string/gapText" />
         
         <TextView

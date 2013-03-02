@@ -15,8 +15,9 @@ import java.io.PrintWriter;
 import java.io.BufferedReader;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Random;
 // for accuracy of nanoseconds
-import java.util.concurrent.locks.LockSupport;
+// import java.util.concurrent.locks.LockSupport;
 
 import android.util.Log;
 //import android.telephony.SignalStrength;
@@ -46,7 +47,7 @@ public class tcpSender extends Thread {
 		sendPktTrain();
 		
 		// write to a sample file
-		writeSampleData();
+		//writeSampleData();
 	}
 	
 	// process the packet train
@@ -92,7 +93,7 @@ public class tcpSender extends Thread {
 		String result = System.currentTimeMillis() + constant.DEL +
 						String.format("%.4f", estUplinkBWResult) + constant.DEL +
 						String.format("%.4f", estDownlinkBWReult) + constant.DEL +
-						(double)(myGapSize)/Math.pow(10,6) + constant.DEL +
+						myGapSize + constant.DEL +
 						myPktSize + constant.DEL +
 						myTrainLength + "\n";
 		if (isErr) {
@@ -103,7 +104,7 @@ public class tcpSender extends Thread {
 	
 	// update the variables
 	public void updateParameters (double gap, int pkt, int train) {
-		myGapSize = (long) (gap*java.lang.Math.pow(10.0, 6.0));
+		myGapSize = (long)(gap);
 		myPktSize = pkt;
 		myTrainLength = train;
 	}
@@ -111,8 +112,7 @@ public class tcpSender extends Thread {
 	// class constructor
 	public tcpSender(double gap, int pkt, int train, String hostname, int portNumber) {
 		if (gap != 0)
-			// convert from ms to ns
-			myGapSize = (long) (gap*java.lang.Math.pow(10.0, 6.0));
+			myGapSize = (long) (gap);
 		else
 			myGapSize = constant.pktGapNS;
 		if (pkt != 0)
@@ -148,6 +148,7 @@ public class tcpSender extends Thread {
 	// set up all the package parameters
     public boolean openSocket() {
     	try {
+    		 Log.w(constant.logTagMSG, "Hostname is " + myHostname + "; port number is " + myPortNumber);
     		pkgTrainSocket = new Socket(myHostname, myPortNumber);
             /*out = new DataOutputStream(pkgTrainSocket.getOutputStream());
             in = new DataInputStream(pkgTrainSocket.getInputStream());
@@ -172,7 +173,10 @@ public class tcpSender extends Thread {
             // set TCP receiving buffer size
             //pkgTrainSocket.setReceiveBufferSize(myPktSize);
             //Log.d(constant.logTagMSG, "Current send buffer size is " + pkgTrainSocket.getReceiveBufferSize());
-            
+            outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
+        		inCtrl = new BufferedReader(new InputStreamReader(
+                		pkgTrainSocket.getInputStream()));
+        		
         } catch (UnknownHostException e) {
             // System.err.println("Don't know about host: " + myHostname);
             // System.exit(1);
@@ -219,11 +223,11 @@ public class tcpSender extends Thread {
     	String ackForConfigMessage;
     	/*byte[] buffer = new byte[200];
 		int size;*/
-    	try {
-    		outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
+    	//try {
+    		/*outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
     		inCtrl = new BufferedReader(new InputStreamReader(
-            		pkgTrainSocket.getInputStream()));
-	        do {
+            		pkgTrainSocket.getInputStream()));*/
+	        //do {
 	        	// flush back the bandwidth result
 	        	outCtrl.println(constant.configMSG + ':' + myGapSize + ',' + myPktSize + ',' + myTrainLength);
 	        	outCtrl.flush();
@@ -231,13 +235,14 @@ public class tcpSender extends Thread {
 	        	// receive from sender
 	        	// size = in.read(buffer);
 	        	// ackForConfigMessage = new String(buffer).trim();
-	        } while( (ackForConfigMessage = inCtrl.readLine()) != null && !ackForConfigMessage.equals(constant.ackMSG));
-	        inCtrl.close();
-    	} catch (IOException e) {
-    		Log.d(constant.logTagMSG, e.toString());
-    	} finally {
-    		outCtrl.close();
-    	}
+	        //} while( (ackForConfigMessage = inCtrl.readLine()) != null && !ackForConfigMessage.equals(constant.ackMSG));
+	        Log.d(constant.logTagMSG, "Send configuration message");
+	        //inCtrl.close();
+    	//} catch (IOException e) {
+    		//Log.d(constant.logTagMSG, e.toString());
+    	//} finally {
+    		// outCtrl.close();
+    	//}
     }
     
     // send TCP packet train
@@ -266,6 +271,14 @@ public class tcpSender extends Thread {
     		e.printStackTrace();
     		probingResult += constant.errMSG + ": IO Error.";
     		return false;
+    	} finally {
+    		try {
+	        inCtrl.close();
+        } catch (IOException e) {
+	        // TODO Auto-generated catch block
+	        e.printStackTrace();
+        }
+    		outCtrl.close();
     	}
     	
     	probingResult += "Uplink Capacity is " + String.format("%.4f", estUplinkBWResult) + " Mbps\n" +
@@ -290,18 +303,18 @@ public class tcpSender extends Thread {
     	payload.setCharAt(payload.length()-1, 'e');*/
     	// StringBuilder payload = new StringBuilder();
 		byte[] payload = new byte[myPktSize];
-    		
+      Random rand = new Random();
     	// Create a zero string
     	for (int i = 0; i < myPktSize; i++) {
-    		payload[i] = '0';
+    		payload[i] = (byte)('A' + rand.nextInt(26));
     	}
     		
     	// assign special characters
-    	payload[0] = 's';
+    	payload[0] = '0';
     	// inject "e\n" into payload
-    	String endStr = "e\n";
+    	String endStr = "1";
     	byte[] endStrbyte = endStr.getBytes();
-    	System.out.println("End byte is " + endStrbyte.toString() + "; With length " + endStrbyte.length);
+    	System.out.println("End byte is " + String.valueOf(endStrbyte) + "; With length " + endStrbyte.length);
     	for (int i = 0; i < endStrbyte.length; i++) {
     		payload[myPktSize - endStrbyte.length + i] = endStrbyte[i];
     	}
@@ -313,55 +326,59 @@ public class tcpSender extends Thread {
     	long beforeTime = 0;
     	long afterTime = 0;
     	double diffTime = 0;
-    	
-    	out = new DataOutputStream(pkgTrainSocket.getOutputStream());
+    	if (pkgTrainSocket == null) {
+    		System.out.println("Invalid socket!!!");
+    	}
+    		 
+    	// out = new DataOutputStream(pkgTrainSocket.getOutputStream());
     	
 		while (counter < myTrainLength) {
 			// start recording the first packet send time
 			if (beforeTime == 0) {
-				beforeTime = System.nanoTime();
-				//beforeTime = System.currentTimeMillis();
+				// beforeTime = System.nanoTime();
+				beforeTime = System.currentTimeMillis();
 			}
 			
 			// send packet with constant gap
-			out.write(payload);
-			out.flush();
+			// out.write(payload);
+			// out.flush();
+			outCtrl.println(new String(payload));
+			outCtrl.flush();
 			
 			// create train gap in nanoseconds
-			/*try {
-				Thread.sleep(constant.pktGapMS);
+			try {
+				Thread.sleep(myGapSize);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-			}*/
-			LockSupport.parkNanos(myGapSize);		
+			}		
 			counter++;
 		}
 		
-		out.close();
+		// out.close();
 		
 		// record finish transmission time
-		afterTime = System.nanoTime();
-		//afterTime = System.currentTimeMillis();
+		// afterTime = System.nanoTime();
+		afterTime = System.currentTimeMillis();
 				
 		Log.d(constant.logTagMSG, "Single Packet size is " + payload.length + " Bytes.");
-		Log.d(constant.logTagMSG, "Single GAP is " + myGapSize/java.lang.Math.pow(10.0, 6.0) + " ms.");
+		Log.d(constant.logTagMSG, "Single GAP is " + myGapSize + " ms.");
 		Log.d(constant.logTagMSG, "Total number of packet is " + counter);
 		
 		String lastMSG;
 		// Total GAP calculation
-		diffTime = (afterTime - beforeTime)/java.lang.Math.pow(10.0, 6.0);
+		diffTime = afterTime - beforeTime;
 		// diffTime = myTrainLength*myGapSize/java.lang.Math.pow(10.0, 6.0);
 		// diffTime = myTrainLength*constant.pktGapMS;
 		lastMSG = constant.finalMSG + ':' + diffTime;
 		// byte[] lastBuffer = new byte[lastMSG.length()];
 		
-		outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
+		// outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
 		
 		// send the last message
 		outCtrl.println(lastMSG);
 		outCtrl.flush();
 		
-		outCtrl.close();
+		// outCtrl.close();
 		
 		//Log.d(constant.logTagMSG, "The last message in bytes: " + new String(lastMSG.getBytes()));
 		
@@ -375,9 +392,9 @@ public class tcpSender extends Thread {
 		int size;
 		size = in.read(buffer);*/
 		
-		outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
+		/*outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
         inCtrl = new BufferedReader(new InputStreamReader(
-        		pkgTrainSocket.getInputStream()));
+        		pkgTrainSocket.getInputStream()));*/
 		
 		Log.d(constant.logTagMSG, "Before waiting for the input");
 		while ((uplinkBWResult = inCtrl.readLine()) != null) {
@@ -388,13 +405,13 @@ public class tcpSender extends Thread {
 				// extra colon added
 				Log.d(constant.logTagMSG, "Uplink Bandwidth result is " + estUplinkBWResult + " Mbps");
 				// send back the ACK result
-				outCtrl.println(constant.ackMSG);
-				outCtrl.flush();
+				// outCtrl.println(constant.ackMSG);
+				// outCtrl.flush();
 				break;
 			}
 		}
-		outCtrl.close();
-		inCtrl.close();
+		// outCtrl.close();
+		// inCtrl.close();
     }
     
     // download link test
@@ -418,8 +435,8 @@ public class tcpSender extends Thread {
         int size;
         size = in.read(buffer);*/
         
-        inCtrl = new BufferedReader(new InputStreamReader(
-        		pkgTrainSocket.getInputStream()));
+        /*inCtrl = new BufferedReader(new InputStreamReader(
+        		pkgTrainSocket.getInputStream()));*/
         
         // output from what received
         while ((inputLine = inCtrl.readLine()) != null) {
@@ -433,8 +450,8 @@ public class tcpSender extends Thread {
   
         	// check if the start time recorded for first received packet
         	if (startTime == 0) {
-        		//startTime = System.currentTimeMillis();
-        		startTime = System.nanoTime();
+        		startTime = System.currentTimeMillis();
+        		// startTime = System.nanoTime();
         		singlePktSize = inputLine.length();
         	}
 
@@ -454,11 +471,11 @@ public class tcpSender extends Thread {
         	//size = in.read(buffer);
         }
         
-        inCtrl.close();
+        //inCtrl.close();
         
-        //endTime = System.currentTimeMillis();
-        endTime = System.nanoTime();
-        gapTimeClt = (endTime - startTime)/java.lang.Math.pow(10.0, 6.0);
+        endTime = System.currentTimeMillis();
+        //endTime = System.nanoTime();
+        gapTimeClt = endTime - startTime;
         
         // Bandwidth calculation
         // 1 Mbit/s = 125 Byte/ms 

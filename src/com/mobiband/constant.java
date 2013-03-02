@@ -11,7 +11,7 @@ import android.os.Environment;
 
 public class constant {
 	// define the host name for the destination server
-	public static final String hostName = "owl.eecs.umich.edu";
+	public static final String hostName = "ep2.eecs.umich.edu";
 	
 	// define the IP address for the destination server
 	//public static final String ipAddress = "74.125.225.210"; 	// Google IP
