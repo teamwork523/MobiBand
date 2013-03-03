@@ -17,6 +17,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import android.widget.Button;
+import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class MobiBand extends Activity {
@@ -28,6 +29,8 @@ public class MobiBand extends Activity {
 	private EditText totalNumPktText;
 	private Button startButton;
 	private Button autoButton;
+	private RadioButton upButton;
+	private RadioButton downButton;
 	private TextView bandwidthReasult;
 	
 	// Experiment related variables
@@ -37,6 +40,7 @@ public class MobiBand extends Activity {
 	private int pktSizeValue = 0;
 	private double gapValue = 0.0;
 	private int trainLengthValue = 0;
+	public static String dirction = "Up";
 	
 	// auto probing arraies
 	private int[] pktSizeList = {1, 2, 4, 8, 16, 32};
@@ -55,7 +59,9 @@ public class MobiBand extends Activity {
         startButton.setOnClickListener(OnClickStartListener);
         // TODO: redesign this so that our app will not crash
         autoButton.setOnClickListener(OnClickAutoListener);
-        
+        // set direction
+        upButton.setOnClickListener(OnClickUpButtonListener);   
+        downButton.setOnClickListener(OnClickUpButtonListener); 
         /*// start the service
         Intent intent = new Intent(this, backgroundService.class);
         // store the hostname and port number into the intent
@@ -74,6 +80,8 @@ public class MobiBand extends Activity {
     	startButton = (Button) findViewById(R.id.startButton);
     	autoButton = (Button) findViewById(R.id.autoButton);
     	bandwidthReasult = (TextView) findViewById(R.id.bandwidthReasult);
+    	upButton = (RadioButton) findViewById(R.id.MobibandUpButton);
+    	downButton = (RadioButton) findViewById(R.id.MobibandDownButton);
     }
     
     // enable/disable all Views
@@ -81,6 +89,16 @@ public class MobiBand extends Activity {
     	startButton.setEnabled(enable);
     	autoButton.setEnabled(enable);
     }
+    
+    // define the direction radio button
+    private OnClickListener OnClickUpButtonListener = new OnClickListener() {
+			
+			public void onClick(View v) {
+				 RadioButton rb = (RadioButton) v;
+				 MobiBand.dirction = (String) rb.getText();	
+				 bandwidthReasult.append(MobiBand.dirction + "\n");
+			}
+		};
     
     // define start button listener
     private OnClickListener OnClickStartListener = new OnClickListener() {
@@ -103,7 +121,8 @@ public class MobiBand extends Activity {
 			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
 			
 			// setup a task
-			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, hostnameValue, portNumberValue);
+			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, 
+					                                    hostnameValue, portNumberValue, MobiBand.dirction);
 			
 			// start a task
 			// Open/close socket has message only when exception happens
@@ -144,7 +163,7 @@ public class MobiBand extends Activity {
 			
 			// loop through all the test cases
 			// create a thread for test
-			tcpSenderWrapper bandwidthTask = new tcpSenderWrapper(gapValue, pktSizeValue, trainLengthValue, srvHostname, srvPortNumber);
+			tcpSenderWrapper bandwidthTask = new tcpSenderWrapper(gapValue, pktSizeValue, trainLengthValue, srvHostname, srvPortNumber, MobiBand.dirction);
 			bandwidthTask.start();
 			
 			// display the result

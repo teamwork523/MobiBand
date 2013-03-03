@@ -39,6 +39,7 @@ public class tcpSender extends Thread {
 	private int myPortNumber = 0;
 	private double estUplinkBWResult = 0.0;
 	private double estDownlinkBWReult = 0.0;
+	private String myDir = "Up";
 	// private SignalStrength rssi = null;
 	
 	// thread execution part
@@ -103,14 +104,15 @@ public class tcpSender extends Thread {
 	}
 	
 	// update the variables
-	public void updateParameters (double gap, int pkt, int train) {
+	public void updateParameters (double gap, int pkt, int train, String dir) {
 		myGapSize = (long)(gap);
 		myPktSize = pkt;
 		myTrainLength = train;
+		myDir = dir;
 	}
 	
 	// class constructor
-	public tcpSender(double gap, int pkt, int train, String hostname, int portNumber) {
+	public tcpSender(double gap, int pkt, int train, String hostname, int portNumber, String dir) {
 		if (gap != 0)
 			myGapSize = (long) (gap);
 		else
@@ -131,6 +133,9 @@ public class tcpSender extends Thread {
 			myPortNumber = portNumber;
 		else
 			myPortNumber = constant.tcpPortNumber;
+		if (!dir.equals("Up")) {
+			myDir = dir;
+		}
 		// fetch current signal strength
 		// rssi = new 
 	}
@@ -229,7 +234,8 @@ public class tcpSender extends Thread {
             		pkgTrainSocket.getInputStream()));*/
 	        //do {
 	        	// flush back the bandwidth result
-	        	outCtrl.println(constant.configMSG + ':' + myGapSize + ',' + myPktSize + ',' + myTrainLength);
+	        	outCtrl.println(constant.configMSG + ':' + myGapSize + ',' + myPktSize + ','
+	        								  + myTrainLength + ',' + myDir);
 	        	outCtrl.flush();
 	        	
 	        	// receive from sender
@@ -248,19 +254,22 @@ public class tcpSender extends Thread {
     // send TCP packet train
     public boolean runSocket() {
     	try {
-    		 Log.d(constant.logTagMSG, "*****************************************************************");
-		     Log.d(constant.logTagMSG, "************************ Uplink BW Test *************************");
-		     Log.d(constant.logTagMSG, "*****************************************************************");
-		     
-	    	// upload link bandwidth test
-	    	runUpLinkTask();
-	    	
-	    	 Log.d(constant.logTagMSG, "*****************************************************************");
-		     Log.d(constant.logTagMSG, "********************** Downlink BW Test *************************");
-		     Log.d(constant.logTagMSG, "*****************************************************************");
-	    	
-	    	// download link bandwidth test
-	    	runDownLinkTask();
+    		
+    		if (myDir == "Up") {
+	  		  Log.d(constant.logTagMSG, "*****************************************************************");
+		      Log.d(constant.logTagMSG, "************************ Uplink BW Test *************************");
+		      Log.d(constant.logTagMSG, "*****************************************************************");
+			     
+		    	// upload link bandwidth test
+		    	runUpLinkTask();
+    		} else {
+		    	Log.d(constant.logTagMSG, "*****************************************************************");
+			    Log.d(constant.logTagMSG, "********************** Downlink BW Test *************************");
+			    Log.d(constant.logTagMSG, "*****************************************************************");
+		    	
+		    	// download link bandwidth test
+		    	runDownLinkTask();
+    		}
     	} catch (NumberFormatException n) {
     		//Log.d(constant.logTagMSG, n.getStackTrace().toString());
     		n.printStackTrace();
