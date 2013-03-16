@@ -34,13 +34,14 @@ public class MobiBand extends Activity {
 	private TextView bandwidthReasult;
 	
 	// Experiment related variables
-	private int counter = 0;
+	private int counterUp = 0;
+	private int counterDown = 0;
 	private String hostnameValue = "";
 	private int portNumberValue = 0;
 	private int pktSizeValue = 0;
 	private double gapValue = 0.0;
 	private int trainLengthValue = 0;
-	public static String dirction = "Up";
+	public static String direction = "Up";
 	
 	// auto probing arraies
 	private int[] pktSizeList = {1, 2, 4, 8, 16, 32};
@@ -95,8 +96,8 @@ public class MobiBand extends Activity {
 			
 			public void onClick(View v) {
 				 RadioButton rb = (RadioButton) v;
-				 MobiBand.dirction = (String) rb.getText();	
-				 bandwidthReasult.append(MobiBand.dirction + "\n");
+				 MobiBand.direction = (String) rb.getText();	
+				 //bandwidthReasult.append(MobiBand.dirction + "\n");
 			}
 		};
     
@@ -122,7 +123,7 @@ public class MobiBand extends Activity {
 			
 			// setup a task
 			tcpSender bandwidthTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, 
-					                                    hostnameValue, portNumberValue, MobiBand.dirction);
+					                                    hostnameValue, portNumberValue, MobiBand.direction);
 			
 			// start a task
 			// Open/close socket has message only when exception happens
@@ -132,7 +133,8 @@ public class MobiBand extends Activity {
 			// currentTaskResult = "Please see results in /sdcard/tmp/";
 			
 			// display the result
-			previousText = "******************\nTask #" + (++counter) + " started. See files in sdcard or log for detail\n" + previousText;
+			previousText = "******************\nSingle Task "+ MobiBand.direction +"#" + ((MobiBand.direction.equals("Up")) ? (++counterUp) : (++counterDown))
+					           + " started.\n" + previousText;
 			bandwidthReasult.setText(previousText);
 			
 			// re-enable the button
@@ -163,11 +165,12 @@ public class MobiBand extends Activity {
 			
 			// loop through all the test cases
 			// create a thread for test
-			tcpSenderWrapper bandwidthTask = new tcpSenderWrapper(gapValue, pktSizeValue, trainLengthValue, srvHostname, srvPortNumber, MobiBand.dirction);
+			tcpSenderWrapper bandwidthTask = new tcpSenderWrapper(gapValue, pktSizeValue, trainLengthValue, srvHostname, srvPortNumber, MobiBand.direction);
 			bandwidthTask.start();
 			
 			// display the result
-			previousText = "******************\nTask (Auto) #" + (++counter) + " started. See files in sdcard or log for detail\n" + previousText;
+			previousText = "******************\nComplete Task " + MobiBand.direction + " #" + ((MobiBand.direction.equals("Up")) ? (++counterUp) : (++counterDown))
+					+ " started. \n" + previousText;
 			bandwidthReasult.setText(previousText);
 						
 			Log.i("PktTrainService", "Auto test start!");
