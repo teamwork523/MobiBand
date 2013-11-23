@@ -86,5 +86,5 @@ public class Util {
 			e.printStackTrace();
 			Log.e(constant.logTagMSG, "ERROR: cannot write to file.\n" + e.toString());
 		}
-    }
+  }
 }

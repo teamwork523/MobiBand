@@ -18,7 +18,7 @@ public final class R {
         public static final int MobibandDownButton=0x7f070012;
         public static final int MobibandUpButton=0x7f070011;
         public static final int autoButton=0x7f070015;
-        public static final int bandwidthReasult=0x7f070017;
+        public static final int bandwidthReasult=0x7f070019;
         public static final int gapLabel=0x7f07000a;
         public static final int gapText=0x7f07000b;
         public static final int gapUnit=0x7f07000c;
@@ -30,14 +30,16 @@ public final class R {
         public static final int linearLayout4=0x7f07000d;
         public static final int linearLayout5=0x7f070010;
         public static final int linearLayout6=0x7f070013;
-        public static final int menu_settings=0x7f070018;
+        public static final int linearLayout7=0x7f070016;
+        public static final int menu_settings=0x7f07001a;
         public static final int pktSizeLabel=0x7f070007;
         public static final int pktSizeText=0x7f070008;
         public static final int pktSizeUnit=0x7f070009;
         public static final int portLabel=0x7f070004;
         public static final int portText=0x7f070005;
-        public static final int scrollView1=0x7f070016;
+        public static final int scrollView1=0x7f070018;
         public static final int startButton=0x7f070014;
+        public static final int stopButton=0x7f070017;
         public static final int totalNumPktLabel=0x7f07000e;
         public static final int totalNumPktText=0x7f07000f;
     }
@@ -64,6 +66,7 @@ public final class R {
         public static final int portLabel=0x7f040006;
         public static final int portText=0x7f040007;
         public static final int startButtonText=0x7f040010;
+        public static final int stopButtonText=0x7f040013;
         public static final int title_activity_mobi_band=0x7f040003;
         public static final int totalNumPktLabel=0x7f04000b;
         public static final int totalNumPktText=0x7f04000c;

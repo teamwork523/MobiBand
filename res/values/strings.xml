@@ -9,15 +9,16 @@
     <string name="portLabel">Port #</string>
     <string name="portText">10100</string>
     <string name="pktSizeLabel">Packet Size</string>
-    <string name="pktSizeText">1024</string>
+    <string name="pktSizeText">10240</string>
     <string name="pktSizeUnit">B</string>
     <string name="totalNumPktLabel">Total number of Packet</string>
-    <string name="totalNumPktText">5</string>
+    <string name="totalNumPktText">500</string>
     <string name="gapLabel">    Gap</string>
-    <string name="gapText">500</string>
+    <string name="gapText">3000</string>
     <string name="gapUnit">ms</string>
     <string name="startButtonText">Single Test</string>
     <string name="bandwidthReasult"></string>
     <string name="autoButtonText">Complete Test</string>
+    <string name="stopButtonText">Stop</string>
 
 </resources>

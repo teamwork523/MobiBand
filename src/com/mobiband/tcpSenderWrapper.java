@@ -22,6 +22,17 @@ public class tcpSenderWrapper extends Thread {
 	private int TOTALROUND = 15;
 	private int TOTALRANDOM = 100000;
 	private String myDir = "Up";
+	private boolean stop = false;
+	
+	//enforce a thread to stop
+	public boolean isStopped() {
+		return stop;
+	}
+	
+	// stop a thread
+	public void setStop(boolean stopResult) {
+		stop = stopResult;
+	}
 	
 	// class constructor
 	public tcpSenderWrapper(double gap, int pktSize, int train, String hostname, int portNumber, String dir) {
@@ -45,18 +56,61 @@ public class tcpSenderWrapper extends Thread {
 	
 	// main thread function
 	public void run() {
+		// RRCTrafficPatternExp();
+		LongDelayFACHExp();
+	}
+	
+	// Increasing second round size
+	private void LongDelayFACHExp() {
+		try {
+			// use the input gap as fixed gap period between the two rounds
+			int initWaitSec = 15;
+			int firstRepeat = 1;
+			int secondRepeat = 1;
+			int totalRepeat = 30;
+			// each round we increase the number packets that we send
+			int incrSendBytes = 500;
+			for (int j = 0; j < totalRepeat; j++) {
+				// check stop flag
+				if (stop) {
+					Log.w(constant.logTagMSG, "Thread Interrupted!!!");
+					return;
+				}
+				Log.w(constant.logTagMSG, "First Test: " +(j+1)+ "th run started");
+				Log.w(constant.logTagMSG, "First test: Wait for " + initWaitSec + " seconds ...");
+				Thread.sleep(initWaitSec*1000);
+				retxSender.updateParameters(0, fixMaxSize*10, firstRepeat, myDir);
+				retxSender.sendPktTrain();
+				Log.w(constant.logTagMSG, "First test: Second wait for "+ fixGap / 1000 + " seconds ...");
+				Thread.sleep((long)(fixGap));
+				// each time we increase a few amount of bytes
+				retxSender.updateParameters(0, fixMinSize + j*incrSendBytes, secondRepeat, myDir);
+				retxSender.sendPktTrain();
+			}
+		} catch (InterruptedException e) {
+			Log.e(constant.logTagMSG, e.getMessage());
+		}
+	}
+	
+	// Follow the MAX/MIN pattern from the RRC inference experiment
+	private void RRCTrafficPatternExp() {
 		try {
 			// first several task
 			int initWaitSec = 15;
-			int firstRepeat = 100;
-			int secondRepeat = 100;
+			int firstRepeat = 1;
+			int secondRepeat = 1;
 			// Each state has 3 diff gaps
 			double[] gapOfInterest = {0,4.5,10};
 			int totalRepeat = 50;
 			for (int j = 0; j < totalRepeat; j++) {
 				for (double i:gapOfInterest) {
+					// check stop flag
+					if (stop) {
+						Log.w(constant.logTagMSG, "Thread Interrupted!!!");
+						return;
+					}
 					Log.w(constant.logTagMSG, "First Test: " + i + " secs gap round;" +(j+1)+ "th run started");
-					Log.w(constant.logTagMSG, "First test: Wait for "+ initWaitSec + " seconds ...");
+					Log.w(constant.logTagMSG, "First test: Wait for " + initWaitSec + " seconds ...");
 					Thread.sleep(initWaitSec * 1000);
 					retxSender.updateParameters(0, fixMaxSize, firstRepeat, myDir);
 					retxSender.sendPktTrain();
@@ -100,8 +154,6 @@ public class tcpSenderWrapper extends Thread {
 		} catch (InterruptedException e) {
 			Log.e(constant.logTagMSG, e.getMessage());
 		}
-			
-		
 	}
 	
 	// create a folder name with current Date + random number

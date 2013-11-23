@@ -40,21 +40,32 @@ public class tcpSender extends Thread {
 	private double estUplinkBWResult = 0.0;
 	private double estDownlinkBWReult = 0.0;
 	private String myDir = "Up";
+	// thread stop
+	private boolean stop = false;
 	// private SignalStrength rssi = null;
 	
 	// thread execution part
 	public void run() {
-		// one experiment
 		sendPktTrain();
 		
 		// write to a sample file
 		//writeSampleData();
 	}
 	
+	// enforce a thread to stop
+	public boolean isStopped() {
+		return stop;
+	}
+	
+	// stop a thread
+	public void setStop(boolean stopResult) {
+		stop = stopResult;
+	}
+	
 	// process the packet train
 	public boolean sendPktTrain() {
 		// run the experiment once
-		if (this.openSocket()) {
+		if (this.openSocket() && !stop) {
 			// synchronize the client and server parameters
 			this.sendConfigToSrv();
 			// packet train in progress
@@ -311,13 +322,10 @@ public class tcpSender extends Thread {
     	payload.setCharAt(0, 's');
     	payload.setCharAt(payload.length()-1, 'e');*/
     	// StringBuilder payload = new StringBuilder();
-		byte[] payload = new byte[myPktSize];
+      byte[] payload = new byte[myPktSize];
       Random rand = new Random();
-    	// Create a zero string
-    	for (int i = 0; i < myPktSize; i++) {
-    		payload[i] = (byte)('A' + rand.nextInt(26));
-    	}
-    		
+    	// Randomize the payload
+      rand.nextBytes(payload);
     	// assign special characters
     	payload[0] = '0';
     	// inject "e\n" into payload
@@ -353,6 +361,11 @@ public class tcpSender extends Thread {
 			// out.flush();
 			outCtrl.println(new String(payload));
 			outCtrl.flush();
+			
+			// stop the process
+			if (stop) {
+    		throw new IOException("Thread interrupted");
+    	}
 			
 			// create train gap in nanoseconds
 			try {
@@ -404,6 +417,10 @@ public class tcpSender extends Thread {
 		/*outCtrl = new PrintWriter(pkgTrainSocket.getOutputStream(), true);
         inCtrl = new BufferedReader(new InputStreamReader(
         		pkgTrainSocket.getInputStream()));*/
+		
+		if (stop) {
+  		throw new IOException("Thread interrupted");
+  	}
 		
 		Log.d(constant.logTagMSG, "Before waiting for the input");
 		while ((uplinkBWResult = inCtrl.readLine()) != null) {
@@ -463,7 +480,11 @@ public class tcpSender extends Thread {
         		// startTime = System.nanoTime();
         		singlePktSize = inputLine.length();
         	}
-
+        	
+        	if (stop) {
+        		throw new IOException("Thread interrupted");
+        	}
+        	
         	// out.flush();
         	byteCounter += inputLine.length();
         	
