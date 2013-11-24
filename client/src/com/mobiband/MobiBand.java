@@ -38,7 +38,7 @@ public class MobiBand extends Activity {
 	private EditText gapText;
 	private EditText totalNumPktText;
 	private Button startButton;
-	private Button autoButton;
+	//private Button autoButton;
 	private Button stopButton;
 	private RadioButton upButton;
 	private RadioButton downButton;
@@ -98,7 +98,7 @@ public class MobiBand extends Activity {
         // setup listener
         startButton.setOnClickListener(OnClickStartListener);
         // auto button listener
-        autoButton.setOnClickListener(OnClickAutoListener);
+        // autoButton.setOnClickListener(OnClickAutoListener);
         // stop button listener
         stopButton.setOnClickListener(OnClickStopListener);
         // set direction
@@ -125,7 +125,7 @@ public class MobiBand extends Activity {
     	gapText = (EditText) findViewById(R.id.gapText);
     	totalNumPktText = (EditText) findViewById(R.id.totalNumPktText);
     	startButton = (Button) findViewById(R.id.startButton);
-    	autoButton = (Button) findViewById(R.id.autoButton);
+    	//autoButton = (Button) findViewById(R.id.autoButton);
     	stopButton = (Button) findViewById(R.id.stopButton);
     	bandwidthReasult = (TextView) findViewById(R.id.bandwidthReasult);
     	upButton = (RadioButton) findViewById(R.id.MobibandUpButton);
@@ -135,7 +135,7 @@ public class MobiBand extends Activity {
     // enable/disable all Views
     private void viewControl(boolean enable) {
     	startButton.setEnabled(enable);
-    	autoButton.setEnabled(enable);
+    	//autoButton.setEnabled(enable);
     }
     
     // define the direction radio button

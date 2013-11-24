@@ -13,10 +13,10 @@
     <string name="pktSizeUnit">B</string>
     <string name="totalNumPktLabel">Total number of Packet</string>
     <string name="totalNumPktText">500</string>
-    <string name="gapLabel">    Gap</string>
+    <string name="gapLabel">Inter-packet Time</string>
     <string name="gapText">3000</string>
     <string name="gapUnit">ms</string>
-    <string name="startButtonText">Single Test</string>
+    <string name="startButtonText">Run</string>
     <string name="bandwidthReasult"></string>
     <string name="autoButtonText">Complete Test</string>
     <string name="stopButtonText">Stop</string>

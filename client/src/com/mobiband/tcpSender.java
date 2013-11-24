@@ -325,7 +325,10 @@ public class tcpSender extends Thread {
       byte[] payload = new byte[myPktSize];
       Random rand = new Random();
     	// Randomize the payload
-      rand.nextBytes(payload);
+      //rand.nextBytes(payload);
+      for (int i = 0; i < payload.length; i++) {
+        payload[i] = (byte)('A' + rand.nextInt(52));
+      }
     	// assign special characters
     	payload[0] = '0';
     	// inject "e\n" into payload
