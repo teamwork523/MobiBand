@@ -32,6 +32,7 @@ import android.widget.RadioButton;
 import android.widget.TextView;
 
 public class MobiBand extends Activity {
+  private MobiBand myActivity = null;
 	// user input && accessible view
 	private EditText hostText;
 	private EditText portText;
@@ -47,7 +48,7 @@ public class MobiBand extends Activity {
 	private RadioGroup networkTypeButtonGroup;
 	private RadioButton tcpButton;
 	private RadioButton icmpButton;
-	private TextView bandwidthReasult;
+	private TextView displayedResults;
 	
 	// Experiment related variables
 	private int counterUp = 0;
@@ -66,7 +67,7 @@ public class MobiBand extends Activity {
 	PowerManager.WakeLock wl;
 	
 	// private access to class member
-	private tcpSenderWrapper completeTask;
+	private SenderWrapper completeTask;
 	private tcpSender singleTask;
 	
 	
@@ -92,6 +93,7 @@ public class MobiBand extends Activity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        myActivity = this;
         pm = (PowerManager) getSystemService(Context.POWER_SERVICE);
         wl = pm.newWakeLock(PowerManager.SCREEN_DIM_WAKE_LOCK, "Screen lock");
         wl.acquire();
@@ -114,6 +116,7 @@ public class MobiBand extends Activity {
         tcpButton.setOnClickListener(OnClickNetworkTypeButtonListener);
         icmpButton.setOnClickListener(OnClickNetworkTypeButtonListener);
         networkTypeButtonGroup.check(tcpButton.getId());
+        
         /*// start the service
         Intent intent = new Intent(this, backgroundService.class);
         // store the hostname and port number into the intent
@@ -127,6 +130,10 @@ public class MobiBand extends Activity {
         listener = myPhoneStateListener;
         // connect telephony manager with phone state listener
         telephonyManager.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);*/
+        
+        // Create UI update thread
+        //UpdateUITask uiThread = new UpdateUITask(this);
+        //uiThread.start();
     }
     
     // bind all the activities
@@ -139,7 +146,7 @@ public class MobiBand extends Activity {
     	startButton = (Button) findViewById(R.id.startButton);
     	//autoButton = (Button) findViewById(R.id.autoButton);
     	stopButton = (Button) findViewById(R.id.stopButton);
-    	bandwidthReasult = (TextView) findViewById(R.id.bandwidthReasult);
+    	displayedResults = (TextView) findViewById(R.id.displayedResults);
     	directionButtonGroup = (RadioGroup) findViewById(R.id.DirectionRadioButtonGroup);
     	upButton = (RadioButton) findViewById(R.id.MobibandUpButton);
     	downButton = (RadioButton) findViewById(R.id.MobibandDownButton);
@@ -160,7 +167,7 @@ public class MobiBand extends Activity {
 			public void onClick(View v) {
 				 RadioButton rb = (RadioButton) v;
 				 MobiBand.direction = (String) rb.getText();	
-				 bandwidthReasult.append(MobiBand.direction + "\n");
+				 // displayedResults.append(MobiBand.direction + "\n");
 			}
 		};
 		
@@ -170,7 +177,7 @@ public class MobiBand extends Activity {
       public void onClick(View v) {
          RadioButton rb = (RadioButton) v;
          MobiBand.networkType = (String) rb.getText();
-         bandwidthReasult.append(MobiBand.networkType + "\n");
+         // displayedResults.append(MobiBand.networkType + "\n");
       }
     };
     
@@ -179,7 +186,7 @@ public class MobiBand extends Activity {
 		
 		public void onClick(View v) {
 			// output definition
-			String previousText = bandwidthReasult.getText().toString().trim();
+			//String previousText = displayedResults.getText().toString().trim();
 			// String currentTaskResult = "";
 			
 			// disable all related view
@@ -194,21 +201,25 @@ public class MobiBand extends Activity {
 			gapValue = Double.parseDouble(gapText.getText().toString().trim());
 			trainLengthValue = Integer.parseInt(totalNumPktText.getText().toString().trim());
 			
-			// setup a task
-			singleTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, 
-					                       hostnameValue, portNumberValue, MobiBand.direction);
-			
-			// start a task
-			// Open/close socket has message only when exception happens
-			// runSocket always has a message
-			// TODO: refactor this part
-			singleTask.start();
-			// currentTaskResult = "Please see results in /sdcard/tmp/";
-			
-			// display the result
-			previousText = "******************\nSingle Task "+ MobiBand.direction +"#" + ((MobiBand.direction.equals("Up")) ? (++counterUp) : (++counterDown))
-					           + " started.\n" + previousText;
-			bandwidthReasult.setText(previousText);
+			// Run the TCP measurement or the ICMP (Ping) measurement
+			if (MobiBand.networkType.equals("TCP")) { 
+  			singleTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, 
+  					                       hostnameValue, portNumberValue, MobiBand.direction, myActivity);
+  			
+  			// start a task
+  			// Open/close socket has message only when exception happens
+  			// runSocket always has a message
+  			// TODO: refactor this part
+  			singleTask.start();
+  			// currentTaskResult = "Please see results in /sdcard/tmp/";
+  			
+  			// display the result
+  			//previousText = "******************\nSingle Task "+ MobiBand.direction +"#" + ((MobiBand.direction.equals("Up")) ? (++counterUp) : (++counterDown))
+  			//		           + " started.\n" + previousText;
+			} else {
+			  ;
+			}
+			//displayedResults.setText(Util.accessResults());
 			
 			// re-enable the button
 			viewControl(true);
@@ -225,7 +236,7 @@ public class MobiBand extends Activity {
 			Log.i("PktTrainService", "Total number of cases in background is " + pktSizeList.length * gapSizeList.length * trainSizeList.length);
 			
 			// output definition
-			String previousText = bandwidthReasult.getText().toString().trim();
+			String previousText = displayedResults.getText().toString().trim();
 			
 			// fetch the hostname and port number
 			String srvHostname = hostText.getText().toString().trim();
@@ -238,13 +249,13 @@ public class MobiBand extends Activity {
 			
 			// loop through all the test cases
 			// create a thread for test
-			completeTask = new tcpSenderWrapper(gapValue, pktSizeValue, trainLengthValue, srvHostname, srvPortNumber, MobiBand.direction);
+			completeTask = new SenderWrapper(gapValue, pktSizeValue, trainLengthValue, srvHostname, srvPortNumber, MobiBand.direction, myActivity);
 			completeTask.start();
 			
 			// display the result
 			previousText = "******************\nComplete Task " + MobiBand.direction + " #" + ((MobiBand.direction.equals("Up")) ? (++counterUp) : (++counterDown))
 					+ " started. \n" + previousText;
-			bandwidthReasult.setText(previousText);
+			displayedResults.setText(previousText);
 						
 			Log.i("PktTrainService", "Auto test start!");
 			// re-enable the button
@@ -303,7 +314,17 @@ public class MobiBand extends Activity {
   			Log.d(TAG, "Signal level is " + Definition.getGSMSS());
   			Log.d(TAG, "Network type is " + Definition.NETWORK_TYPE);
   		}
-  		bandwidthReasult.append(newMessage+"\n");
+  		displayedResults.append(newMessage+"\n");
   	}
   };
+  
+  public void updateTextView(final String data){
+    runOnUiThread(new Runnable(){
+      @Override
+      public void run() {
+        String previousText = displayedResults.getText().toString().trim();
+        displayedResults.setText(data + "\n" + previousText);
+      } 
+    });
+  }
 }

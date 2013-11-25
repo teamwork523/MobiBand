@@ -21,7 +21,7 @@ public final class R {
         public static final int MobibandUpButton=0x7f070012;
         public static final int NetworkTypeRadioButtonGroup=0x7f070015;
         public static final int TCPButton=0x7f070016;
-        public static final int bandwidthReasult=0x7f07001c;
+        public static final int displayedResults=0x7f07001c;
         public static final int gapLabel=0x7f07000a;
         public static final int gapText=0x7f07000b;
         public static final int gapUnit=0x7f07000c;
@@ -55,7 +55,7 @@ public final class R {
     public static final class string {
         public static final int app_name=0x7f040000;
         public static final int autoButtonText=0x7f040012;
-        public static final int bandwidthReasult=0x7f040011;
+        public static final int displayedResults=0x7f040011;
         public static final int gapLabel=0x7f04000d;
         public static final int gapText=0x7f04000e;
         public static final int gapUnit=0x7f04000f;

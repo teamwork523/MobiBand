@@ -242,10 +242,10 @@
         android:layout_height="fill_parent" >
 
         <TextView
-            android:id="@+id/bandwidthReasult"
+            android:id="@+id/displayedResults"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:text="@string/bandwidthReasult" />
+            android:text="@string/displayedResults" />
 
     </ScrollView>
 </LinearLayout>

@@ -19,6 +19,7 @@ import java.util.Random;
 // for accuracy of nanoseconds
 // import java.util.concurrent.locks.LockSupport;
 
+import android.app.Activity;
 import android.util.Log;
 //import android.telephony.SignalStrength;
 
@@ -43,6 +44,8 @@ public class tcpSender extends Thread {
 	// thread stop
 	private boolean stop = false;
 	// private SignalStrength rssi = null;
+	
+	private MobiBand UIActivity = null;
 	
 	// thread execution part
 	public void run() {
@@ -123,7 +126,7 @@ public class tcpSender extends Thread {
 	}
 	
 	// class constructor
-	public tcpSender(double gap, int pkt, int train, String hostname, int portNumber, String dir) {
+	public tcpSender(double gap, int pkt, int train, String hostname, int portNumber, String dir, MobiBand uiActivity) {
 		if (gap != 0)
 			myGapSize = (long) (gap);
 		else
@@ -149,6 +152,7 @@ public class tcpSender extends Thread {
 		}
 		// fetch current signal strength
 		// rssi = new 
+		UIActivity = uiActivity;
 	}
 	
 	// fetch the experiment result
@@ -431,8 +435,10 @@ public class tcpSender extends Thread {
 			// uplinkBWResult = new String(buffer).trim();
 			if (uplinkBWResult.substring(0, constant.resultMSG.length()).equals(constant.resultMSG)) {
 				estUplinkBWResult = Double.parseDouble(uplinkBWResult.substring(constant.resultMSG.length()+1));
+				String uplinkResult = "TCP Uplink Bandwidth result is " + Math.floor(estUplinkBWResult * 1000)/1000 + " Mbps";
 				// extra colon added
-				Log.d(constant.logTagMSG, "Uplink Bandwidth result is " + estUplinkBWResult + " Mbps");
+				Log.d(constant.logTagMSG, uplinkResult);
+				UIActivity.updateTextView(uplinkResult);
 				// send back the ACK result
 				// outCtrl.println(constant.ackMSG);
 				// outCtrl.flush();
@@ -525,6 +531,8 @@ public class tcpSender extends Thread {
         Log.d(constant.logTagMSG, "Estimated Total download bandwidth is " + estTotalDownBandWidth + " Mbps.");
         Log.d(constant.logTagMSG, "Availabe fraction is " + availableBWFraction);
         Log.d(constant.logTagMSG, "Estimated Available download bandwidth is " + estDownlinkBWReult + " Mbps.");
+        String downlinkResult = "TCP Downlink bandwidth is " + Math.floor(estTotalDownBandWidth * 1000) / 1000 + " Mbps";
+        UIActivity.updateTextView(downlinkResult);
     }    
     
     // form the parameters information
