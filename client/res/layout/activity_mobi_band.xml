@@ -150,7 +150,7 @@
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="45dp" >
-        <RadioGroup
+        <RadioGroup android:id="@+id/DirectionRadioButtonGroup"
           android:layout_width="fill_parent"
           android:layout_height="wrap_content"
           android:orientation="horizontal"
@@ -164,9 +164,29 @@
             android:layout_height="wrap_content"
             android:text="Down" />
         </RadioGroup> 
-      </LinearLayout>  
+    </LinearLayout>
     <LinearLayout
         android:id="@+id/linearLayout6"
+        android:gravity="center"
+        android:layout_width="match_parent"
+        android:layout_height="45dp" >
+        <RadioGroup android:id="@+id/NetworkTypeRadioButtonGroup"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:orientation="horizontal"
+          android:gravity="center">
+          <RadioButton android:id="@+id/TCPButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="TCP" />
+          <RadioButton android:id="@+id/ICMPButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ICMP(Ping)" />
+        </RadioGroup> 
+    </LinearLayout>
+    <LinearLayout
+        android:id="@+id/linearLayout7"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="45dp"  >
@@ -202,7 +222,7 @@
         
     </LinearLayout>
     <!-- <LinearLayout
-        android:id="@+id/linearLayout7"
+        android:id="@+id/linearLayout8"
         android:gravity="center"
         android:layout_width="match_parent"
         android:layout_height="45dp"  >

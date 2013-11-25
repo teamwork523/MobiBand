@@ -27,6 +27,7 @@ import android.view.View.OnClickListener;
 import android.widget.EditText;
 
 import android.widget.Button;
+import android.widget.RadioGroup;
 import android.widget.RadioButton;
 import android.widget.TextView;
 
@@ -40,8 +41,12 @@ public class MobiBand extends Activity {
 	private Button startButton;
 	//private Button autoButton;
 	private Button stopButton;
+	private RadioGroup directionButtonGroup;
 	private RadioButton upButton;
 	private RadioButton downButton;
+	private RadioGroup networkTypeButtonGroup;
+	private RadioButton tcpButton;
+	private RadioButton icmpButton;
 	private TextView bandwidthReasult;
 	
 	// Experiment related variables
@@ -53,6 +58,7 @@ public class MobiBand extends Activity {
 	private double gapValue = 0.0;
 	private int trainLengthValue = 0;
 	public static String direction = "Up";
+	public static String networkType = "TCP";
 	private String TAG = "PktTrainService";
 	TelephonyManager telephonyManager;
 	PhoneStateListener listener;
@@ -102,19 +108,25 @@ public class MobiBand extends Activity {
         // stop button listener
         stopButton.setOnClickListener(OnClickStopListener);
         // set direction
-        upButton.setOnClickListener(OnClickUpButtonListener);   
-        downButton.setOnClickListener(OnClickUpButtonListener); 
+        upButton.setOnClickListener(OnClickDirectionButtonListener);   
+        downButton.setOnClickListener(OnClickDirectionButtonListener);
+        directionButtonGroup.check(upButton.getId());
+        tcpButton.setOnClickListener(OnClickNetworkTypeButtonListener);
+        icmpButton.setOnClickListener(OnClickNetworkTypeButtonListener);
+        networkTypeButtonGroup.check(tcpButton.getId());
         /*// start the service
         Intent intent = new Intent(this, backgroundService.class);
         // store the hostname and port number into the intent
         intent.putExtra("hostname", hostText.getText().toString().trim());
         intent.putExtra("portNumber", Integer.parseInt(portText.getText().toString().trim()));
         startService(intent);*/
+        
+        /*
         // Get the telephony manager
         telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         listener = myPhoneStateListener;
         // connect telephony manager with phone state listener
-        telephonyManager.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);
+        telephonyManager.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);*/
     }
     
     // bind all the activities
@@ -128,8 +140,12 @@ public class MobiBand extends Activity {
     	//autoButton = (Button) findViewById(R.id.autoButton);
     	stopButton = (Button) findViewById(R.id.stopButton);
     	bandwidthReasult = (TextView) findViewById(R.id.bandwidthReasult);
+    	directionButtonGroup = (RadioGroup) findViewById(R.id.DirectionRadioButtonGroup);
     	upButton = (RadioButton) findViewById(R.id.MobibandUpButton);
     	downButton = (RadioButton) findViewById(R.id.MobibandDownButton);
+    	networkTypeButtonGroup = (RadioGroup) findViewById(R.id.NetworkTypeRadioButtonGroup);
+    	tcpButton = (RadioButton) findViewById(R.id.TCPButton);
+    	icmpButton = (RadioButton) findViewById(R.id.ICMPButton);
     }
     
     // enable/disable all Views
@@ -139,14 +155,24 @@ public class MobiBand extends Activity {
     }
     
     // define the direction radio button
-    private OnClickListener OnClickUpButtonListener = new OnClickListener() {
+    private OnClickListener OnClickDirectionButtonListener = new OnClickListener() {
 			
 			public void onClick(View v) {
 				 RadioButton rb = (RadioButton) v;
 				 MobiBand.direction = (String) rb.getText();	
-				 //bandwidthReasult.append(MobiBand.dirction + "\n");
+				 bandwidthReasult.append(MobiBand.direction + "\n");
 			}
 		};
+		
+		// define the network type radio button
+    private OnClickListener OnClickNetworkTypeButtonListener = new OnClickListener() {
+      
+      public void onClick(View v) {
+         RadioButton rb = (RadioButton) v;
+         MobiBand.networkType = (String) rb.getText();
+         bandwidthReasult.append(MobiBand.networkType + "\n");
+      }
+    };
     
     // define start button listener
     private OnClickListener OnClickStartListener = new OnClickListener() {
