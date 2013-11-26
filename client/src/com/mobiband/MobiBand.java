@@ -68,7 +68,8 @@ public class MobiBand extends Activity {
 	
 	// private access to class member
 	private SenderWrapper completeTask;
-	private tcpSender singleTask;
+	private tcpSender tcpTask;
+	private PingSender pingTask;
 	
 	
 	// auto probing arraies
@@ -130,10 +131,6 @@ public class MobiBand extends Activity {
         listener = myPhoneStateListener;
         // connect telephony manager with phone state listener
         telephonyManager.listen(listener, PhoneStateListener.LISTEN_SIGNAL_STRENGTHS);*/
-        
-        // Create UI update thread
-        //UpdateUITask uiThread = new UpdateUITask(this);
-        //uiThread.start();
     }
     
     // bind all the activities
@@ -203,21 +200,22 @@ public class MobiBand extends Activity {
 			
 			// Run the TCP measurement or the ICMP (Ping) measurement
 			if (MobiBand.networkType.equals("TCP")) { 
-  			singleTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, 
+			  tcpTask = new tcpSender(gapValue, pktSizeValue, trainLengthValue, 
   					                       hostnameValue, portNumberValue, MobiBand.direction, myActivity);
   			
   			// start a task
   			// Open/close socket has message only when exception happens
   			// runSocket always has a message
   			// TODO: refactor this part
-  			singleTask.start();
+			  tcpTask.start();
   			// currentTaskResult = "Please see results in /sdcard/tmp/";
   			
   			// display the result
   			//previousText = "******************\nSingle Task "+ MobiBand.direction +"#" + ((MobiBand.direction.equals("Up")) ? (++counterUp) : (++counterDown))
   			//		           + " started.\n" + previousText;
 			} else {
-			  ;
+			  pingTask = new PingSender(gapValue, pktSizeValue, hostnameValue, myActivity);
+			  pingTask.start();
 			}
 			//displayedResults.setText(Util.accessResults());
 			
@@ -271,9 +269,9 @@ public class MobiBand extends Activity {
 				Log.d(TAG,"Complete Task got interrupt");
 				completeTask.setStop(true);
 			}
-			if (!singleTask.isStopped()) {
+			if (!tcpTask.isStopped()) {
 				Log.d(TAG,"Single Task got interrupt");
-				singleTask.setStop(true);
+				tcpTask.setStop(true);
 			}
 		}
 	};

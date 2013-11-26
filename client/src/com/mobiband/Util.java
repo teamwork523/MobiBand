@@ -14,10 +14,13 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
+import java.security.InvalidParameterException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import android.provider.Contacts.Intents.UI;
 import android.util.Log;
 
 public class Util {
@@ -102,9 +105,81 @@ public class Util {
         channel.close();
         //bufferWritter.write(tempResult);
         //bufferWritter.close();
-	} catch (IOException e) {
-		e.printStackTrace();
-		Log.e(constant.logTagMSG, "ERROR: cannot write to file.\n" + e.toString());
-	}
-}
+  	} catch (IOException e) {
+  		e.printStackTrace();
+  		Log.e(constant.logTagMSG, "ERROR: cannot write to file.\n" + e.toString());
+  	}
+  }
+  
+  /**
+   * Return a list of system environment path 
+   */
+  public static String[] fetchEnvPaths() {
+    String path = "";
+    Map<String, String> env = System.getenv();
+    if (env.containsKey("PATH")) {
+      path = env.get("PATH");
+    }
+    return (path.contains(":")) ? path.split(":") : (new String[]{path});
+  }
+  
+  /**
+   * Determine the ping executable based on ip address byte length
+   */
+  public static String getPingExecutablePath() {
+    Process testPingProc = null;
+    String[] progList = fetchEnvPaths();
+    String pingExecutable = null, ping_executable = "ping";
+    if (progList != null && progList.length != 0) {
+      for (String pingLocation : progList) {
+        try {
+          pingExecutable = pingLocation + "/" + ping_executable;
+          testPingProc = Runtime.getRuntime().exec(pingExecutable);
+        } catch (IOException e) {
+          // reset the executable
+          pingExecutable = null;
+          // The ping command doesn't exist in that path, try another one
+          continue;
+        } finally {
+          if (testPingProc != null)
+            testPingProc.destroy();
+        }
+        break;
+      }
+    }
+    return pingExecutable;
+  }
+  
+  public static String constructCommand(Object... strings) throws InvalidParameterException {
+    String finalCommand = "";
+    int len = strings.length;
+    if (len < 0) {
+      throw new InvalidParameterException("0 arguments passed in for constructing command");
+    }
+    
+    for (int i = 0; i < len - 1; i++) {
+      finalCommand += (strings[i] + " ");
+    }
+    finalCommand += strings[len - 1];
+    return finalCommand;
+  }
+  
+  /**
+   * Returns a String array that contains the ICMP sequence number and the round
+   * trip time extracted from a ping output. The first array element is the
+   * sequence number and the second element is the round trip time.
+   * 
+   * Returns a null object if either element cannot be found.
+   */
+  public static String[] extractInfoFromPingOutput(String outputLine) {
+    try {
+      Pattern pattern = Pattern.compile("icmp_seq=([0-9]+)\\s.* time=([0-9]+(\\.[0-9]+)?)");
+      Matcher matcher = pattern.matcher(outputLine);
+      matcher.find();
+      
+      return new String[] {matcher.group(1), matcher.group(2)};
+    } catch (IllegalStateException e) {
+      return null;
+    }
+  }
 }

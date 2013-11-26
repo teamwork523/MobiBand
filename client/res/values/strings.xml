@@ -12,9 +12,9 @@
     <string name="pktSizeText">10240</string>
     <string name="pktSizeUnit">B</string>
     <string name="totalNumPktLabel">Total number of Packet</string>
-    <string name="totalNumPktText">10</string>
+    <string name="totalNumPktText">50</string>
     <string name="gapLabel">Inter-packet Time</string>
-    <string name="gapText">30</string>
+    <string name="gapText">0</string>
     <string name="gapUnit">ms</string>
     <string name="startButtonText">Run</string>
     <string name="displayedResults"></string>

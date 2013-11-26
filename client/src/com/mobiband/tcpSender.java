@@ -19,7 +19,6 @@ import java.util.Random;
 // for accuracy of nanoseconds
 // import java.util.concurrent.locks.LockSupport;
 
-import android.app.Activity;
 import android.util.Log;
 //import android.telephony.SignalStrength;
 
@@ -127,10 +126,10 @@ public class tcpSender extends Thread {
 	
 	// class constructor
 	public tcpSender(double gap, int pkt, int train, String hostname, int portNumber, String dir, MobiBand uiActivity) {
-		if (gap != 0)
-			myGapSize = (long) (gap);
-		else
-			myGapSize = constant.pktGapNS;
+	  if (gap >= 0)
+	    myGapSize = (long) (gap);
+	  else
+	    myGapSize = constant.pktGapNS;
 		if (pkt != 0)
 			myPktSize = pkt;
 		else
@@ -376,7 +375,9 @@ public class tcpSender extends Thread {
 			
 			// create train gap in nanoseconds
 			try {
-				Thread.sleep(myGapSize);
+			  if (myGapSize > 0) {
+			    Thread.sleep(myGapSize);
+			  }
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}		

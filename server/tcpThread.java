@@ -35,7 +35,7 @@ public class tcpThread extends Thread {
     
     // class constructor
     tcpThread (double gap, int pkt, int train, int port_number) {
-		if (gap != 0)
+		if (gap >= 0)
 			// convert from ms to ns
 			myGapSize = (long)(gap);
 		else
@@ -322,6 +322,9 @@ public class tcpThread extends Thread {
 			System.out.println("Send " + (counter + 1) + "th message with size: " + realPayload.length());
 			// create train gap in nanoseconds
 			try {
+				if (myGapSize <= 0) {
+					myGapSize = 1;
+				}
 				Thread.sleep(myGapSize);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
